@@ -77,6 +77,6 @@ Elder Scrolls: Daggerfall (Unused)
 --------------------------------------
 Graphics of enemies unused in game, but exist in the files.
 
-Horse Riders (Somewhat Done) - Need to rerange one more set to be complete I think.
+Horse Riders (DONE) - Need to rerange one more set to be complete I think.
 
 King Lysandus (DONE) - No work needs to be done, his files should work as is with no modifyication. 
