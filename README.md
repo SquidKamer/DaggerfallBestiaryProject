@@ -9,67 +9,57 @@ Elder Scrolls: Arena
 ----------------------------------
 Stats for each monster can be found here: https://en.uesp.net/wiki/Arena:Monsters
 
-Rat - (X) Will not use. (Is in DF)
+(6/4/22) - Removing some entries for foes we will not use due to their presences in DF and being too ugly for use as a varient.
 
-Goblin - (DONE) Remade with Oblivion Mesh asset.
+----------------------------------
+Monsters
+----------------------------------
+Goblin - (Needs work) Remade with Oblivion Mesh asset. (Being remade with Morrwind assets)
 
-Lizard Man - (DONE) Using Arena Assets
+Lizard Man - (DONE) Using Original Assets
+----------- (Armored Lizard Man Varient Included)
 
-Wolf - (Needs work) Remade with Oblivion assets, however will swap to Morrwind for its animations.
+Wolf - (Needs work) Will be made from Morrwind Assets
+----------- Snow Wolf as Varient
+----------- Hell Hound as Varient
 
-Snow Wolf - (X) refer to Wolf.
+Minotaur - (X) Will be made from oblivion assets.
 
-Orc - (X) Will not use. (Is in DF)
+Spider - (X) Use as a Varient. Need to split frames.
 
-Skeleton (X) Will not use. (Is in DF)
-
-Minotaur - (X) Have the Minotaur mesh from Oblivion, need to animate. 
-
-Spider - (X) Considering as varient.
-
-Ghoul - (X) Needs to be recolored (Looks like moldy cheese)
-
-Hell Hound - (X) refer to Wolf.
+Ghoul - (X) Needs to be recolored (Looks like moldy cheese) Considering original asset.
 
 Ghost - (X) To be new Ghost varient 
-
-Zombie - (X) Will not use. (Is in DF)
 
 Troll - (X) Need to Rip Oblivion Asset and remake.
 
 Wraith - (X) To be new Wraith Vairent.
 
-Homonculus - (X) Need to split frames from data files.
+Homonculus - (DONE) Fits with Daggerfall.
 
-Ice Golem - (X) To be new Golem varient.
+Ice Golem - (X) To be new Golem varient. (Remake with original asset as new varient)
 
-Stone Golem (X) Will not use. 
+Iron Golem - (X) To be new Golem varient. (Remake with original asset as new varient)
 
-Iron Golem - (X) To be new Golem varient.
+Fire Daemon - (X) Need to split frames from data files. (Tail screws up DF's perspective. Will need new asset.)
 
-Fire Daemon - (X) Need to split frames from data files.
-
-Medusa - (X) Needs to be remade with new graphic.
-
-Vampire - (X) Will not use. (Is in DF)
-
-Lich - (X) Will not use. (Is in DF)
+Medusa - (X) Needs to be remade with new graphic. (Mesh made, need to animate)
 
 Jagar Tharn - (X) Maybe I can convince Kab to put him in for fun.
 
 --------------------------------------
-Elder Scrolls: Daggerfall (1995 Demo)
+Elder Scrolls: Daggerfall (1995 Demo) - COMPLETED
 --------------------------------------
 Unused graphics that can be reused again. All known sprites are ripped.
 Just need to put them together.
 
-Skeleton - (X) Sword Varient w/oShield + More frames
+Skeleton - (DONE) Sword Varient w/oShield + More frames
 
-Bat - (X) hand drawn, is smaller that regular bat. Can be varient.
+Bat - (DONE) hand drawn, is smaller that regular bat. Can be varient.
 
-Gargoyle - (X) Looks completely different. Could be used as Stone Golem varient.
+Gargoyle - (DONE) Looks completely different. Could be used as Stone Golem varient.
 
-Nymph - (X) Way better imo. No ugly face and nice run animation. Can be Nymph Varient.
+Nymph - (DONE) Way better imo. No ugly face and nice run animation. Can be Nymph Varient.
 
 
 --------------------------------------
@@ -77,6 +67,6 @@ Elder Scrolls: Daggerfall (Unused)
 --------------------------------------
 Graphics of enemies unused in game, but exist in the files.
 
-Horse Riders (DONE) - Need to rerange one more set to be complete I think.
+Horse Riders (DONE) - All sets are in, and are ready to go.
 
-King Lysandus (DONE) - No work needs to be done, his files should work as is with no modifyication. 
+King Lysandus (X) - (His Attack and idle animation needs to be reversed)
