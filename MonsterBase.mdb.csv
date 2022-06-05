@@ -1,0 +1,2 @@
+ID,Name,Career,Level,MaleTexture,FemaleTexture,CorpseTextureArchive,CorpseTextureRecord,HasIdle,CastsMagic,HasRangedAttack,PrimaryAttackAnimFrames
+256,Goblin,Goblin,4,1600,1600,1600,20,TRUE,,,"{0,1,2,3,-1,4}"

@@ -1284,6 +1284,9 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - LizardMan Armored/1607_0-7.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - LizardMan Armored/1607_9-2.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - LizardMan Armored/1607_3-0.png",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - LizardMan Armored/1607_3-7.png"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - LizardMan Armored/1607_3-7.png",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/CareerBase.cdb.csv",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/MonsterBase.mdb.csv",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryMod.cs"
     ]
 }
