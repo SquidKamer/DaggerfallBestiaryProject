@@ -1,2 +1,2 @@
-ID,Name,Career,Level,MaleTexture,FemaleTexture,CorpseTextureArchive,CorpseTextureRecord,HasIdle,CastsMagic,HasRangedAttack,PrimaryAttackAnimFrames
-256,Goblin,Goblin,4,1600,1600,1600,20,TRUE,,,"{0,1,2,3,-1,4}"
+ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTextureArchive,CorpseTextureRecord,HasIdle,CastsMagic,HasRangedAttack,PrimaryAttackAnimFrames,MinDamage,MaxDamage,MinHealth,MaxHealth,ArmorValue,Weight,CanOpenDoors,LootTableKey
+256,Goblin,Goblin,2,General,Darkness,Orcs,1600,1600,1600,20,TRUE,,,"{0,1,2,3,-1,4}",1,6,14,18,2,200,TRUE,A

@@ -12,6 +12,7 @@ using DaggerfallWorkshop.Utility;
 using System.Linq;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Questing;
+using DaggerfallWorkshop.Game.Items;
 
 namespace DaggerfallBestiaryProject
 {
@@ -282,8 +283,26 @@ namespace DaggerfallBestiaryProject
                 if (!GetIndex("CastsMagic", out int CastsMagicIndex)) continue;
                 if (!GetIndex("HasRangedAttack", out int HasRangedAttackIndex)) continue;
                 if (!GetIndex("PrimaryAttackAnimFrames", out int PrimaryAttackAnimFramesIndex)) continue;
+                if (!GetIndex("Team", out int TeamIndex)) continue;
 
                 int? LevelIndex = GetIndexOpt("Level");
+                int? BehaviourIndex = GetIndexOpt("Behaviour");
+                int? AffinityIndex = GetIndexOpt("Affinity");
+                int? MinDamageIndex = GetIndexOpt("MinDamage");
+                int? MaxDamageIndex = GetIndexOpt("MaxDamage");
+                int? MinHealthIndex = GetIndexOpt("MinHealth");
+                int? MaxHealthIndex = GetIndexOpt("MaxHealth");
+                int? ArmorValueIndex = GetIndexOpt("ArmorValue");
+                int? MinMetalToHitIndex = GetIndexOpt("MinMetalToHit");
+                int? WeightIndex = GetIndexOpt("Weight");
+                int? SeesThroughInvisibilityIndex = GetIndexOpt("SeesThroughInvisibility");
+                int? MoveSoundIndex = GetIndexOpt("MoveSound");
+                int? BarkSoundIndex = GetIndexOpt("BarkSound");
+                int? AttackSoundIndex = GetIndexOpt("AttackSound");
+                int? ParrySoundsIndex = GetIndexOpt("ParrySounds");
+                int? CanOpenDoorsIndex = GetIndexOpt("CanOpenDoors");
+                int? LootTableKeyIndex = GetIndexOpt("LootTableKey");
+                int? MapChanceIndex = GetIndexOpt("MapChance");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -300,6 +319,13 @@ namespace DaggerfallBestiaryProject
                         MobileEnemy mobile = new MobileEnemy();
 
                         mobile.ID = int.Parse(tokens[IdIndex]);
+                        mobile.Behaviour = (BehaviourIndex.HasValue && !string.IsNullOrEmpty(tokens[BehaviourIndex.Value]))
+                            ? (MobileBehaviour)Enum.Parse(typeof(MobileBehaviour), tokens[BehaviourIndex.Value], ignoreCase: true)
+                            : MobileBehaviour.General;
+                        mobile.Affinity = (AffinityIndex.HasValue && !string.IsNullOrEmpty(tokens[AffinityIndex.Value]))
+                            ? (MobileAffinity)Enum.Parse(typeof(MobileAffinity), tokens[AffinityIndex.Value], ignoreCase: true)
+                            : MobileAffinity.None;
+                        mobile.Team = (MobileTeams)Enum.Parse(typeof(MobileTeams), tokens[TeamIndex], ignoreCase: true);
                         mobile.MaleTexture = int.Parse(tokens[MaleTextureIndex]);
                         mobile.FemaleTexture = int.Parse(tokens[FemaleTextureIndex]);
                         int CorpseArchive = int.Parse(tokens[CorpseTextureArchiveIndex]);
@@ -339,6 +365,115 @@ namespace DaggerfallBestiaryProject
                         {
                             Debug.LogWarning($"Monster '{mobile.ID}' did not have a level specified. Defaulting to 1");
                             mobile.Level = 1;
+                        }
+
+                        if(MinDamageIndex.HasValue && !string.IsNullOrEmpty(tokens[MinDamageIndex.Value]))
+                        {
+                            mobile.MinDamage = int.Parse(tokens[MinDamageIndex.Value]);
+                        }
+                        else if(IsMonster(mobile.ID))
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a min damage specified. Defaulting to 1");
+                            mobile.MinDamage = 1;
+                        }
+
+                        if(MaxDamageIndex.HasValue && !string.IsNullOrEmpty(tokens[MaxDamageIndex.Value]))
+                        {
+                            mobile.MaxDamage = int.Parse(tokens[MaxDamageIndex.Value]);
+                        }
+                        else if (IsMonster(mobile.ID))
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a max damage specified. Defaulting to {mobile.MinDamage + 1}");
+                            mobile.MaxDamage = mobile.MinDamage + 1;
+                        }
+
+                        if (MinHealthIndex.HasValue && !string.IsNullOrEmpty(tokens[MinHealthIndex.Value]))
+                        {
+                            mobile.MinHealth = int.Parse(tokens[MinHealthIndex.Value]);
+                        }
+                        else if (IsMonster(mobile.ID))
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a min health specified. Defaulting to 1");
+                            mobile.MinHealth = 1;
+                        }
+
+                        if (MaxHealthIndex.HasValue && !string.IsNullOrEmpty(tokens[MaxHealthIndex.Value]))
+                        {
+                            mobile.MaxHealth = int.Parse(tokens[MaxHealthIndex.Value]);
+                        }
+                        else if (IsMonster(mobile.ID))
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a max health specified. Defaulting to {mobile.MinHealth + 1}");
+                            mobile.MaxHealth = mobile.MinHealth + 1;
+                        }
+
+                        if (ArmorValueIndex.HasValue && !string.IsNullOrEmpty(tokens[ArmorValueIndex.Value]))
+                        {
+                            mobile.ArmorValue = int.Parse(tokens[ArmorValueIndex.Value]);
+                        }
+                        else if (IsMonster(mobile.ID))
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' did not have an armor value specified. Defaulting to 0");
+                            mobile.ArmorValue = 0;
+                        }
+
+                        if (MinMetalToHitIndex.HasValue && !string.IsNullOrEmpty(tokens[MinMetalToHitIndex.Value]))
+                        {
+                            mobile.MinMetalToHit = (WeaponMaterialTypes)Enum.Parse(typeof(WeaponMaterialTypes), tokens[MinMetalToHitIndex.Value], ignoreCase: true);
+                        }
+                        else
+                        {
+                            mobile.MinMetalToHit = WeaponMaterialTypes.None;
+                        }
+
+                        if (WeightIndex.HasValue && !string.IsNullOrEmpty(tokens[WeightIndex.Value]))
+                        {
+                            mobile.Weight = int.Parse(tokens[WeightIndex.Value]);
+                        }
+                        else if (IsMonster(mobile.ID))
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a weight specified. Defaulting to 100");
+                            mobile.Weight = 100;
+                        }
+
+                        if (SeesThroughInvisibilityIndex.HasValue && !string.IsNullOrEmpty(tokens[SeesThroughInvisibilityIndex.Value]))
+                        {
+                            mobile.SeesThroughInvisibility = ParseBool(tokens[SeesThroughInvisibilityIndex.Value], $"line={lineNumber},column={SeesThroughInvisibilityIndex.Value}");
+                        }
+
+                        if(MoveSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[MoveSoundIndex.Value]))
+                        {
+                            mobile.MoveSound = int.Parse(tokens[MoveSoundIndex.Value]);
+                        }
+
+                        if (BarkSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[BarkSoundIndex.Value]))
+                        {
+                            mobile.BarkSound = int.Parse(tokens[BarkSoundIndex.Value]);
+                        }
+
+                        if (AttackSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[AttackSoundIndex.Value]))
+                        {
+                            mobile.AttackSound = int.Parse(tokens[AttackSoundIndex.Value]);
+                        }
+
+                        if (ParrySoundsIndex.HasValue && !string.IsNullOrEmpty(tokens[ParrySoundsIndex.Value]))
+                        {
+                            mobile.ParrySounds = ParseBool(tokens[ParrySoundsIndex.Value], $"line={lineNumber},column={ParrySoundsIndex.Value}");
+                        }
+
+                        if (CanOpenDoorsIndex.HasValue && !string.IsNullOrEmpty(tokens[CanOpenDoorsIndex.Value]))
+                        {
+                            mobile.CanOpenDoors = ParseBool(tokens[CanOpenDoorsIndex.Value], $"line={lineNumber},column={CanOpenDoorsIndex.Value}");
+                        }
+
+                        if(LootTableKeyIndex.HasValue && !string.IsNullOrEmpty(tokens[LootTableKeyIndex.Value]))
+                        {
+                            mobile.LootTableKey = tokens[LootTableKeyIndex.Value];
+                        }
+
+                        if (MapChanceIndex.HasValue && !string.IsNullOrEmpty(tokens[MapChanceIndex.Value]))
+                        {
+                            mobile.MapChance = int.Parse(tokens[MapChanceIndex.Value]);
                         }
 
                         if (customEnemies.ContainsKey(mobile.ID))
