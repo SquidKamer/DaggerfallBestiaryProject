@@ -445,15 +445,30 @@ namespace DaggerfallBestiaryProject
                         {
                             mobile.MoveSound = int.Parse(tokens[MoveSoundIndex.Value]);
                         }
+                        else
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' has no move sound");
+                            mobile.MoveSound = -1;
+                        }
 
                         if (BarkSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[BarkSoundIndex.Value]))
                         {
                             mobile.BarkSound = int.Parse(tokens[BarkSoundIndex.Value]);
                         }
+                        else
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' has no bark sound");
+                            mobile.BarkSound = -1;
+                        }
 
                         if (AttackSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[AttackSoundIndex.Value]))
                         {
                             mobile.AttackSound = int.Parse(tokens[AttackSoundIndex.Value]);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Monster '{mobile.ID}' has no attack sound");
+                            mobile.AttackSound = -1;
                         }
 
                         if (ParrySoundsIndex.HasValue && !string.IsNullOrEmpty(tokens[ParrySoundsIndex.Value]))
