@@ -1,2 +1,2 @@
 ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTextureArchive,CorpseTextureRecord,HasIdle,CastsMagic,HasRangedAttack,PrimaryAttackAnimFrames,MinDamage,MaxDamage,MinHealth,MaxHealth,ArmorValue,Weight,CanOpenDoors,LootTableKey,MoveSound,BarkSound,AttackSound,ParrySounds
-256,Goblin,Goblin,2,General,Darkness,Orcs,1600,1600,1600,20,TRUE,,,"{0,1,2,3,-1,4}",1,6,14,18,2,200,TRUE,A,136,314,138,TRUE
+256,Goblin,Goblin,2,General,Darkness,Orcs,1600,1600,1600,20,TRUE,,,"{0,1,2,3,-1,4}",1,6,14,18,2,200,TRUE,A,204,314,138,TRUE
