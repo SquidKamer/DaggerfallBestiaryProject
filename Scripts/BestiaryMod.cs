@@ -27,7 +27,7 @@ namespace DaggerfallBestiaryProject
             public DFCareer dfCareer;
         }
 
-        private Dictionary<string, CustomCareer> customCareers = new Dictionary<string, CustomCareer>();
+        private Dictionary<string, CustomCareer> customCareers = new Dictionary<string, CustomCareer>(StringComparer.OrdinalIgnoreCase);
 
         public struct CustomEnemy
         {
@@ -63,7 +63,8 @@ namespace DaggerfallBestiaryProject
         }
 
         private void Start()
-        {            
+        {
+            ParseDfCareers();
             ParseCustomCareers();
             ParseCustomEnemies();
         }
@@ -83,6 +84,27 @@ namespace DaggerfallBestiaryProject
             {
                 ModManager.Instance.TryGetAsset(name, clone: false, out TextAsset asset);
                 yield return asset;
+            }
+        }
+
+        void ParseDfCareers()
+        {
+            foreach(MonsterCareers career in Enum.GetValues(typeof(MonsterCareers)).Cast<MonsterCareers>().Skip(1))
+            {
+                DFCareer dfCareer = DaggerfallEntity.GetMonsterCareerTemplate(career);
+                if(dfCareer != null)
+                {
+                    customCareers.Add(career.ToString(), new CustomCareer { dfCareer = dfCareer });
+                }
+            }
+
+            foreach (ClassCareers career in Enum.GetValues(typeof(ClassCareers)).Cast<ClassCareers>().Skip(1))
+            {
+                DFCareer dfCareer = DaggerfallEntity.GetClassCareerTemplate(career);
+                if (dfCareer != null)
+                {
+                    customCareers.Add(career.ToString(), new CustomCareer { dfCareer = dfCareer });
+                }
             }
         }
 
