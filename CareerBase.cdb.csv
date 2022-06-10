@@ -1,2 +1,4 @@
 Name,HitPointsPerLevel,Strength,Intelligence,Willpower,Agility,Endurance,Personality,Speed,Luck
-Goblin,6,45,40,60,65,60,30,60,50
+Goblin,4,30,20,30,40,30,30,30,50
+Homunculus,4,20,60,70,85,60,10,60,50
+Lizardman,5,70,30,40,60,60,30,70,50
