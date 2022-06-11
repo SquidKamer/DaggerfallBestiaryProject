@@ -34,6 +34,7 @@ namespace DaggerfallBestiaryProject
             public MobileEnemy mobileEnemy;
             public string name;
             public string career;
+            public int[] spellbook;
         }
 
         private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
@@ -67,6 +68,8 @@ namespace DaggerfallBestiaryProject
             ParseDfCareers();
             ParseCustomCareers();
             ParseCustomEnemies();
+
+            EnemyEntity.OnLootSpawned += OnEnemySpawn;
         }
 
         IEnumerable<TextAsset> GetDBAssets(string extension)
@@ -211,7 +214,7 @@ namespace DaggerfallBestiaryProject
             return list.ToArray();
         }
 
-        int[] ParseAnimArg(string Arg, string Context)
+        int[] ParseArrayArg(string Arg, string Context)
         {
             if (string.IsNullOrEmpty(Arg))
                 return Array.Empty<int>();
@@ -325,6 +328,7 @@ namespace DaggerfallBestiaryProject
                 int? CanOpenDoorsIndex = GetIndexOpt("CanOpenDoors");
                 int? LootTableKeyIndex = GetIndexOpt("LootTableKey");
                 int? MapChanceIndex = GetIndexOpt("MapChance");
+                int? SpellBookIndex = GetIndexOpt("Spellbook");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -362,7 +366,7 @@ namespace DaggerfallBestiaryProject
                             mobile.RangedAttackAnimFrames = new int[] { 3, 2, 0, 0, 0, -1, 1, 1, 2, 3 };
                         }
 
-                        mobile.PrimaryAttackAnimFrames = ParseAnimArg(tokens[PrimaryAttackAnimFramesIndex], $"line={lineNumber}, column={PrimaryAttackAnimFramesIndex}");
+                        mobile.PrimaryAttackAnimFrames = ParseArrayArg(tokens[PrimaryAttackAnimFramesIndex], $"line={lineNumber}, column={PrimaryAttackAnimFramesIndex}");
 
                         if(mobile.CastsMagic)
                         {
@@ -521,6 +525,11 @@ namespace DaggerfallBestiaryProject
                         customEnemy.name = tokens[NameIndex];
                         customEnemy.career = tokens[CareerIndex];
 
+                        if(SpellBookIndex.HasValue)
+                        {
+                            customEnemy.spellbook = ParseArrayArg(tokens[SpellBookIndex.Value], $"line={lineNumber}, column={SpellBookIndex.Value}");
+                        }
+
                         if(!customCareers.TryGetValue(customEnemy.career, out CustomCareer customCareer))
                         {
                             Debug.LogError($"Monster '{mobile.ID}' has unknown career '{customEnemy.career}'");
@@ -542,6 +551,26 @@ namespace DaggerfallBestiaryProject
 
             EnemyBasics.Enemies = enemies.ToArray();
             QuestMachine.Instance.FoesTable.AddIntoTable(questEnemyLines.ToArray());
+        }
+
+        void OnEnemySpawn(object source, EnemyLootSpawnedEventArgs args)
+        {
+            var enemyEntity = source as EnemyEntity;
+            if (enemyEntity == null)
+                return;
+
+            if (!customEnemies.TryGetValue(args.MobileEnemy.ID, out CustomEnemy customEnemy))
+                return;
+
+            if (customEnemy.spellbook == null || customEnemy.spellbook.Length == 0)
+                return;
+
+            // Reset spells, just in case
+            while (enemyEntity.SpellbookCount() > 0)
+                enemyEntity.DeleteSpell(enemyEntity.SpellbookCount() - 1);
+
+            byte[] spellIndices = customEnemy.spellbook.Select(id => (byte)id).ToArray();
+            enemyEntity.SetEnemySpells(spellIndices);
         }
     }
 }
