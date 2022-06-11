@@ -13,6 +13,11 @@ using System.Linq;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.Items;
+using DaggerfallWorkshop.Game.MagicAndEffects;
+using DaggerfallWorkshop.Game.Formulas;
+using DaggerfallWorkshop.Game.Utility;
+using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
+using DaggerfallConnect.Save;
 
 namespace DaggerfallBestiaryProject
 {
@@ -35,6 +40,7 @@ namespace DaggerfallBestiaryProject
             public string name;
             public string career;
             public int[] spellbook;
+            public int onHitEffect;
         }
 
         private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
@@ -70,6 +76,7 @@ namespace DaggerfallBestiaryProject
             ParseCustomEnemies();
 
             EnemyEntity.OnLootSpawned += OnEnemySpawn;
+            FormulaHelper.RegisterOverride<Action<EnemyEntity, DaggerfallEntity, int>>(mod, "OnMonsterHit", OnMonsterHit);
         }
 
         IEnumerable<TextAsset> GetDBAssets(string extension)
@@ -329,6 +336,7 @@ namespace DaggerfallBestiaryProject
                 int? LootTableKeyIndex = GetIndexOpt("LootTableKey");
                 int? MapChanceIndex = GetIndexOpt("MapChance");
                 int? SpellBookIndex = GetIndexOpt("Spellbook");
+                int? OnHitIndex = GetIndexOpt("OnHit");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -530,6 +538,11 @@ namespace DaggerfallBestiaryProject
                             customEnemy.spellbook = ParseArrayArg(tokens[SpellBookIndex.Value], $"line={lineNumber}, column={SpellBookIndex.Value}");
                         }
 
+                        if(OnHitIndex.HasValue && !string.IsNullOrEmpty(tokens[OnHitIndex.Value]))
+                        {
+                            customEnemy.onHitEffect = int.Parse(tokens[OnHitIndex.Value]);
+                        }
+
                         if(!customCareers.TryGetValue(customEnemy.career, out CustomCareer customCareer))
                         {
                             Debug.LogError($"Monster '{mobile.ID}' has unknown career '{customEnemy.career}'");
@@ -571,6 +584,113 @@ namespace DaggerfallBestiaryProject
 
             byte[] spellIndices = customEnemy.spellbook.Select(id => (byte)id).ToArray();
             enemyEntity.SetEnemySpells(spellIndices);
+        }
+
+        public void OnMonsterHit(EnemyEntity attacker, DaggerfallEntity target, int damage)
+        {
+            Diseases[] diseaseListA = { Diseases.Plague };
+            Diseases[] diseaseListB = { Diseases.Plague, Diseases.StomachRot, Diseases.BrainFever };
+            Diseases[] diseaseListC =
+            {
+                Diseases.Plague, Diseases.YellowFever, Diseases.StomachRot, Diseases.Consumption,
+                Diseases.BrainFever, Diseases.SwampRot, Diseases.Cholera, Diseases.Leprosy, Diseases.RedDeath,
+                Diseases.TyphoidFever, Diseases.Dementia
+            };
+
+            int customEffect = 0;
+            if(customEnemies.TryGetValue(attacker.MobileEnemy.ID, out CustomEnemy customEnemy))
+            {
+                customEffect = customEnemy.onHitEffect;
+            }
+
+            float random;
+            if(attacker.MobileEnemy.ID == (int)MonsterCareers.Rat || customEffect == 1)
+			{
+                // In classic rat can only give plague (diseaseListA), but DF Chronicles says plague, stomach rot and brain fever (diseaseListB).
+                // Don't know which was intended. Using B since it has more variety.
+                if (Dice100.SuccessRoll(5))
+                    FormulaHelper.InflictDisease(attacker, target, diseaseListB);
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.GiantBat || customEffect == 2)
+			{
+                // Classic uses 2% chance, but DF Chronicles says 5% chance. Not sure which was intended.
+                if (Dice100.SuccessRoll(2))
+                    FormulaHelper.InflictDisease(attacker, target, diseaseListB);
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Spider
+                || attacker.MobileEnemy.ID == (int)MonsterCareers.GiantScorpion
+                || customEffect == 3)
+			{
+                EntityEffectManager targetEffectManager = target.EntityBehaviour.GetComponent<EntityEffectManager>();
+                if (targetEffectManager.FindIncumbentEffect<Paralyze>() == null)
+                {
+                    SpellRecord.SpellRecordData spellData;
+                    GameManager.Instance.EntityEffectBroker.GetClassicSpellRecord(66, out spellData);
+                    EffectBundleSettings bundle;
+                    GameManager.Instance.EntityEffectBroker.ClassicSpellRecordDataToEffectBundleSettings(spellData, BundleTypes.Spell, out bundle);
+                    EntityEffectBundle spell = new EntityEffectBundle(bundle, attacker.EntityBehaviour);
+                    EntityEffectManager attackerEffectManager = attacker.EntityBehaviour.GetComponent<EntityEffectManager>();
+                    attackerEffectManager.SetReadySpell(spell, true);
+                }
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Werewolf
+                || customEffect == 4)
+			{
+                random = UnityEngine.Random.Range(0f, 100f);
+                if (random <= FormulaHelper.specialInfectionChance && target.EntityBehaviour.EntityType == EntityTypes.Player)
+                {
+                    // Werewolf
+                    EntityEffectBundle bundle = GameManager.Instance.PlayerEffectManager.CreateLycanthropyDisease(LycanthropyTypes.Werewolf);
+                    GameManager.Instance.PlayerEffectManager.AssignBundle(bundle, AssignBundleFlags.SpecialInfection);
+                }
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Nymph
+                || attacker.MobileEnemy.ID == (int)MonsterCareers.Lamia
+                || customEffect == 5)
+			{
+                FormulaHelper.FatigueDamage(attacker, target, damage);
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Wereboar
+                || customEffect == 6)
+			{
+                random = UnityEngine.Random.Range(0f, 100f);
+                if (random <= FormulaHelper.specialInfectionChance && target.EntityBehaviour.EntityType == EntityTypes.Player)
+                {
+                    // Wereboar
+                    EntityEffectBundle bundle = GameManager.Instance.PlayerEffectManager.CreateLycanthropyDisease(LycanthropyTypes.Wereboar);
+                    GameManager.Instance.PlayerEffectManager.AssignBundle(bundle, AssignBundleFlags.SpecialInfection);
+                }
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Zombie
+                || customEffect == 7)
+			{
+                // Nothing in classic. DF Chronicles says 2% chance of disease, which seems like it was probably intended.
+                // Diseases listed in DF Chronicles match those of mummy (except missing cholera, probably a mistake)
+                if (Dice100.SuccessRoll(2))
+                    FormulaHelper.InflictDisease(attacker, target, diseaseListC);
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Mummy
+                || customEffect == 8)
+			{
+                if (Dice100.SuccessRoll(5))
+                    FormulaHelper.InflictDisease(attacker, target, diseaseListC);
+            }
+			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Vampire
+                || attacker.MobileEnemy.ID == (int)MonsterCareers.VampireAncient
+                || customEffect == 9)
+			{
+                random = UnityEngine.Random.Range(0f, 100f);
+                if (random <= FormulaHelper.specialInfectionChance && target.EntityBehaviour.EntityType == EntityTypes.Player)
+                {
+                    // Inflict stage one vampirism disease
+                    EntityEffectBundle bundle = GameManager.Instance.PlayerEffectManager.CreateVampirismDisease();
+                    GameManager.Instance.PlayerEffectManager.AssignBundle(bundle, AssignBundleFlags.SpecialInfection);
+                }
+                else if (random <= 2.0f)
+                {
+                    FormulaHelper.InflictDisease(attacker, target, diseaseListA);
+                }
+            }
         }
     }
 }
