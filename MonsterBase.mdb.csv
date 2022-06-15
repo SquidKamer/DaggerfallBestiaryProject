@@ -4,3 +4,4 @@ ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTex
 258,Lizard Man,Lizardman,4,General,Daylight,Scorpions,1601,1601,1601,20,TRUE,,,"{0,1,2,3,4,5,6,-1,7}",1,8,13,34,5,400,TRUE,A,204,320,138,TRUE,,,,3
 259,Lizard Warrior,Lizardman,8,General,Daylight,Scorpions,1607,1601,1601,20,TRUE,,,"{0,1,2,3,4,5,6,-1,7}",6,18,17,66,2,600,TRUE,A,204,320,138,TRUE,,,,3
 260,Bat,GiantBat,1,Flying,Animal,Vermin,1603,1603,401,0,,,,"{0,1,-1,2,3}",1,4,8,14,6,40,,,124,125,126,,,,,2
+261,Medusa,Medusa,16,General,Darkness,Aquatic,1611,1611,1611,25,TRUE,TRUE,,"{0,1,2,3,4,5,6,7,-1,8}",10,50,30,90,0,1200,TRUE,,133,318,,,,Dwarven,35,
