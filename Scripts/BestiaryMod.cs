@@ -43,6 +43,16 @@ namespace DaggerfallBestiaryProject
             public int onHitEffect;
         }
 
+        class EncounterTable
+        {
+            public string name;
+            public int[] enemyIds;
+        }
+
+        private Dictionary<int, List<EncounterTable>> dungeonTypeTables = new Dictionary<int, List<EncounterTable>>();
+        private Dictionary<string, EncounterTable> encounterTables = new Dictionary<string, EncounterTable>(StringComparer.OrdinalIgnoreCase);
+        bool readDefaultTables = false;
+
         private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
 
         public Dictionary<int, CustomEnemy> CustomEnemies { get { return customEnemies; } }
@@ -56,7 +66,6 @@ namespace DaggerfallBestiaryProject
             // and these two alternate every 128 ids
             return ((enemyId / 128) % 2) == 0;
         }
-
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -74,9 +83,45 @@ namespace DaggerfallBestiaryProject
             ParseDfCareers();
             ParseCustomCareers();
             ParseCustomEnemies();
+            ParseEncounterTables();
 
             EnemyEntity.OnLootSpawned += OnEnemySpawn;
             FormulaHelper.RegisterOverride<Action<EnemyEntity, DaggerfallEntity, int>>(mod, "OnMonsterHit", OnMonsterHit);
+            PlayerEnterExit.OnPreTransition += PlayerEnterExit_OnPreTransition;
+        }
+
+        List<EncounterTable> GetDungeonTypeEncounterTables(int dungeonType)
+        {
+            if(!dungeonTypeTables.TryGetValue(dungeonType, out List<EncounterTable> encounterTables))
+            {
+                encounterTables = new List<EncounterTable>();
+                dungeonTypeTables.Add(dungeonType, encounterTables);
+            }
+
+            return encounterTables;
+        }
+
+        private void Update()
+        {
+            // Run this post Start so we can get modded default encounter tables
+            if(!readDefaultTables)
+            {
+                int dungeonTypeCount = Enum.GetValues(typeof(DFRegion.DungeonTypes)).Length - 1;
+
+                for (int i = 0; i < dungeonTypeCount; ++i)
+                {
+                    List<EncounterTable> dungeonTypeEncounterTables = GetDungeonTypeEncounterTables(i);
+
+                    EncounterTable table = new EncounterTable();
+                    table.name = $"Default{(DFRegion.DungeonTypes)i}";
+                    table.enemyIds = RandomEncounters.EncounterTables[i].Enemies.Select(id => (int)id).ToArray();
+
+                    dungeonTypeEncounterTables.Add(table);
+                    encounterTables.Add(table.name, table);
+                }
+
+                readDefaultTables = true; 
+            }
         }
 
         IEnumerable<TextAsset> GetDBAssets(string extension)
@@ -374,7 +419,7 @@ namespace DaggerfallBestiaryProject
                             mobile.RangedAttackAnimFrames = new int[] { 3, 2, 0, 0, 0, -1, 1, 1, 2, 3 };
                         }
 
-                        mobile.PrimaryAttackAnimFrames = ParseArrayArg(tokens[PrimaryAttackAnimFramesIndex], $"line={lineNumber}, column={PrimaryAttackAnimFramesIndex}");
+                        mobile.PrimaryAttackAnimFrames = ParseArrayArg(tokens[PrimaryAttackAnimFramesIndex], $"line={lineNumber}, column={PrimaryAttackAnimFramesIndex+1}");
 
                         if(mobile.CastsMagic)
                         {
@@ -535,7 +580,7 @@ namespace DaggerfallBestiaryProject
 
                         if(SpellBookIndex.HasValue)
                         {
-                            customEnemy.spellbook = ParseArrayArg(tokens[SpellBookIndex.Value], $"line={lineNumber}, column={SpellBookIndex.Value}");
+                            customEnemy.spellbook = ParseArrayArg(tokens[SpellBookIndex.Value], $"line={lineNumber}, column={SpellBookIndex.Value+1}");
                         }
 
                         if(OnHitIndex.HasValue && !string.IsNullOrEmpty(tokens[OnHitIndex.Value]))
@@ -691,6 +736,93 @@ namespace DaggerfallBestiaryProject
                     FormulaHelper.InflictDisease(attacker, target, diseaseListA);
                 }
             }
+        }
+
+        void ParseEncounterTables()
+        {
+            foreach (TextAsset asset in GetDBAssets(".tdb.csv"))
+            {
+                var stream = new StreamReader(new MemoryStream(asset.bytes));
+
+                string header = stream.ReadLine();
+
+                string[] fields = header.Split(';', ',');
+
+                if (fields.Length != 22)
+                {
+                    Debug.LogError($"Error while parsing {asset.name}: table database has invalid format (expected 22 columns)");
+                    continue;
+                }
+
+                CultureInfo cultureInfo = new CultureInfo("en-US");
+                int lineNumber = 1;
+                while (stream.Peek() >= 0)
+                {
+                    ++lineNumber;
+
+                    string line = stream.ReadLine();
+                    try
+                    {
+                        string[] tokens = SplitCsvLine(line);
+                        if(tokens.Length != 22)
+                        {
+                            Debug.LogError($"Error while parsing {asset.name}:{lineNumber}: table database line has invalid format (expected 22 columns)");
+                            break; 
+                        }
+
+                        if(encounterTables.ContainsKey(tokens[0]))
+                        {
+                            continue;
+                        }
+
+                        EncounterTable table = new EncounterTable();
+                        table.name = tokens[0];
+
+                        var dungeonTypes = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
+
+                        table.enemyIds = tokens.Skip(2).Select(id => int.Parse(id)).ToArray();
+
+                        foreach(int dungeonType in dungeonTypes)
+                        {
+                            GetDungeonTypeEncounterTables(dungeonType).Add(table);
+                        }
+                        encounterTables.Add(table.name, table);
+                    }
+                    catch(Exception ex)
+                    {
+                        Debug.LogError($"Error while parsing {asset.name}:{lineNumber}: {ex}");
+                    }
+                }
+            }
+        }
+
+        private void PlayerEnterExit_OnPreTransition(PlayerEnterExit.TransitionEventArgs args)
+        {
+            if (args.TransitionType != PlayerEnterExit.TransitionType.ToDungeonInterior)
+                return;
+
+            DFLocation location = GameManager.Instance.PlayerGPS.CurrentLocation;
+            if (!location.Loaded || !location.HasDungeon)
+                return; // Shouldn't happen?
+
+            ref DFLocation.LocationDungeon dungeon = ref location.Dungeon;
+            ref var locationHeader = ref dungeon.RecordElement.Header;
+
+            // While DaggerfallConnect doesn't document how to get the dungeon type,
+            // my research has shown this to be accurate
+            int dungeonType = locationHeader.Unknown3[2];
+            if (!Enum.IsDefined(typeof(DFRegion.DungeonTypes), dungeonType))
+                return;
+
+            List<EncounterTable> tables = GetDungeonTypeEncounterTables(dungeonType);
+            if (tables == null || tables.Count == 0)
+                return;
+
+            EncounterTable selectedTable = tables[UnityEngine.Random.Range(0, tables.Count)];
+
+            // Test
+            ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[dungeonType];
+            table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
         }
     }
 }
