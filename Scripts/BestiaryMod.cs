@@ -382,6 +382,7 @@ namespace DaggerfallBestiaryProject
                 int? MapChanceIndex = GetIndexOpt("MapChance");
                 int? SpellBookIndex = GetIndexOpt("Spellbook");
                 int? OnHitIndex = GetIndexOpt("OnHit");
+                int? NoBloodIndex = GetIndexOpt("NoBlood");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -568,6 +569,14 @@ namespace DaggerfallBestiaryProject
                         if (MapChanceIndex.HasValue && !string.IsNullOrEmpty(tokens[MapChanceIndex.Value]))
                         {
                             mobile.MapChance = int.Parse(tokens[MapChanceIndex.Value]);
+                        }
+
+                        if(NoBloodIndex.HasValue && !string.IsNullOrEmpty(tokens[NoBloodIndex.Value]))
+                        {
+                            if(ParseBool(tokens[NoBloodIndex.Value], $"line={lineNumber},column={NoBloodIndex.Value}"))
+                            {
+                                mobile.BloodIndex = 2;
+                            }
                         }
 
                         if (customEnemies.ContainsKey(mobile.ID))
@@ -805,12 +814,9 @@ namespace DaggerfallBestiaryProject
             if (!location.Loaded || !location.HasDungeon)
                 return; // Shouldn't happen?
 
-            ref DFLocation.LocationDungeon dungeon = ref location.Dungeon;
-            ref var locationHeader = ref dungeon.RecordElement.Header;
-
             // While DaggerfallConnect doesn't document how to get the dungeon type,
             // my research has shown this to be accurate
-            int dungeonType = locationHeader.Unknown3[2];
+            int dungeonType = (int)location.MapTableData.DungeonType;
             if (!Enum.IsDefined(typeof(DFRegion.DungeonTypes), dungeonType))
                 return;
 
