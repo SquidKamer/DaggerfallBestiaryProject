@@ -124,10 +124,17 @@ namespace DaggerfallBestiaryProject
             }
         }
 
+        IEnumerable<Mod> EnumerateEnabledModsReverse()
+        {
+            IEnumerable<Mod> query = ModManager.Instance.EnumerateModsReverse();
+
+            return query.Where(x => x.Enabled);
+        }
+
         IEnumerable<TextAsset> GetDBAssets(string extension)
         {
             HashSet<string> names = new HashSet<string>();
-            foreach(Mod mod in ModManager.Instance.EnumerateEnabledModsReverse())
+            foreach(Mod mod in EnumerateEnabledModsReverse())
             {
                 foreach(string file in mod.ModInfo.Files.Where(filePath => filePath.EndsWith(extension)).Select(filePath => Path.GetFileName(filePath)))
                 {
