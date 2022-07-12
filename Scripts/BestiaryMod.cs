@@ -199,6 +199,24 @@ namespace DaggerfallBestiaryProject
                     return true;
                 }
 
+                int? GetIndexOpt(string fieldName)
+                {
+                    int index = -1;
+                    for (int i = 0; i < fields.Length; ++i)
+                    {
+                        if (fields[i].Equals(fieldName, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                    if (index == -1)
+                    {
+                        return null;
+                    }
+                    return index;
+                }
+
                 if (!GetIndex("Name", out int NameIndex)) continue;
                 if (!GetIndex("HitPointsPerLevel", out int HPIndex)) continue;
                 if (!GetIndex("Strength", out int StrengthIndex)) continue;
@@ -210,6 +228,12 @@ namespace DaggerfallBestiaryProject
                 if (!GetIndex("Speed", out int SpeedIndex)) continue;
                 if (!GetIndex("Luck", out int LuckIndex)) continue;
 
+                int? magicToleranceIndex = GetIndexOpt("Magic");
+                int? fireToleranceIndex = GetIndexOpt("Fire");
+                int? frostToleranceIndex = GetIndexOpt("Frost");
+                int? shockToleranceIndex = GetIndexOpt("Shock");
+                int? poisonToleranceIndex = GetIndexOpt("Poison");
+                
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
                 while (stream.Peek() >= 0)
@@ -240,6 +264,31 @@ namespace DaggerfallBestiaryProject
                         career.Personality = int.Parse(tokens[PersonalityIndex], cultureInfo);
                         career.Speed = int.Parse(tokens[SpeedIndex], cultureInfo);
                         career.Luck = int.Parse(tokens[LuckIndex], cultureInfo);
+
+                        if(magicToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[magicToleranceIndex.Value]))
+                        {
+                            career.Magic = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[magicToleranceIndex.Value]);
+                        }
+
+                        if (fireToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[fireToleranceIndex.Value]))
+                        {
+                            career.Fire = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[fireToleranceIndex.Value]);
+                        }
+
+                        if (frostToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[frostToleranceIndex.Value]))
+                        {
+                            career.Frost = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[frostToleranceIndex.Value]);
+                        }
+
+                        if (shockToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[shockToleranceIndex.Value]))
+                        {
+                            career.Shock = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[shockToleranceIndex.Value]);
+                        }
+
+                        if (poisonToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[poisonToleranceIndex.Value]))
+                        {
+                            career.Poison = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[poisonToleranceIndex.Value]);
+                        }
 
                         CustomCareer customCareer = new CustomCareer();
                         customCareer.dfCareer = career;
@@ -374,6 +423,10 @@ namespace DaggerfallBestiaryProject
                 int? AffinityIndex = GetIndexOpt("Affinity");
                 int? MinDamageIndex = GetIndexOpt("MinDamage");
                 int? MaxDamageIndex = GetIndexOpt("MaxDamage");
+                int? MinDamage2Index = GetIndexOpt("MinDamage2");
+                int? MaxDamage2Index = GetIndexOpt("MaxDamage2");
+                int? MinDamage3Index = GetIndexOpt("MinDamage3");
+                int? MaxDamage3Index = GetIndexOpt("MaxDamage3");
                 int? MinHealthIndex = GetIndexOpt("MinHealth");
                 int? MaxHealthIndex = GetIndexOpt("MaxHealth");
                 int? ArmorValueIndex = GetIndexOpt("ArmorValue");
@@ -390,6 +443,14 @@ namespace DaggerfallBestiaryProject
                 int? SpellBookIndex = GetIndexOpt("Spellbook");
                 int? OnHitIndex = GetIndexOpt("OnHit");
                 int? NoBloodIndex = GetIndexOpt("NoBlood");
+                int? PrimaryAttackAnimFrames2Index = GetIndexOpt("PrimaryAttackAnimFrames2");
+                int? ChanceForAttack2Index = GetIndexOpt("ChanceForAttack2");
+                int? PrimaryAttackAnimFrames3Index = GetIndexOpt("PrimaryAttackAnimFrames3");
+                int? ChanceForAttack3Index = GetIndexOpt("ChanceForAttack3");
+                int? PrimaryAttackAnimFrames4Index = GetIndexOpt("PrimaryAttackAnimFrames4");
+                int? ChanceForAttack4Index = GetIndexOpt("ChanceForAttack4");
+                int? PrimaryAttackAnimFrames5Index = GetIndexOpt("PrimaryAttackAnimFrames5");
+                int? ChanceForAttack5Index = GetIndexOpt("ChanceForAttack5");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -418,9 +479,9 @@ namespace DaggerfallBestiaryProject
                         int CorpseArchive = int.Parse(tokens[CorpseTextureArchiveIndex]);
                         int CorpseRecord = int.Parse(tokens[CorpseTextureRecordIndex]);
                         mobile.CorpseTexture = EnemyBasics.CorpseTexture(CorpseArchive, CorpseRecord);
-                        mobile.HasIdle = ParseBool(tokens[HasIdleIndex], $"line={lineNumber}, column={HasIdleIndex}");
-                        mobile.CastsMagic = ParseBool(tokens[CastsMagicIndex], $"line={lineNumber}, column={CastsMagicIndex}");
-                        mobile.HasRangedAttack1 = ParseBool(tokens[HasRangedAttackIndex], $"line={lineNumber}, column={HasRangedAttackIndex}");
+                        mobile.HasIdle = ParseBool(tokens[HasIdleIndex], $"line={lineNumber}, column={HasIdleIndex+1}");
+                        mobile.CastsMagic = ParseBool(tokens[CastsMagicIndex], $"line={lineNumber}, column={CastsMagicIndex+1}");
+                        mobile.HasRangedAttack1 = ParseBool(tokens[HasRangedAttackIndex], $"line={lineNumber}, column={HasRangedAttackIndex+1}");
 
                         if(mobile.HasRangedAttack1)
                         {
@@ -429,7 +490,59 @@ namespace DaggerfallBestiaryProject
 
                         mobile.PrimaryAttackAnimFrames = ParseArrayArg(tokens[PrimaryAttackAnimFramesIndex], $"line={lineNumber}, column={PrimaryAttackAnimFramesIndex+1}");
 
-                        if(mobile.CastsMagic)
+                        if(PrimaryAttackAnimFrames2Index.HasValue)
+                        {
+                            mobile.PrimaryAttackAnimFrames2 = ParseArrayArg(tokens[PrimaryAttackAnimFrames2Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames2Index + 1}");
+                            if(ChanceForAttack2Index.HasValue)
+                            {
+                                mobile.ChanceForAttack2 = int.Parse(tokens[ChanceForAttack2Index.Value]);
+                            }
+                            else
+                            {
+                                mobile.ChanceForAttack2 = 50;
+                            }
+                        }
+
+                        if (PrimaryAttackAnimFrames3Index.HasValue)
+                        {
+                            mobile.PrimaryAttackAnimFrames3 = ParseArrayArg(tokens[PrimaryAttackAnimFrames3Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames3Index + 1}");
+                            if (ChanceForAttack3Index.HasValue)
+                            {
+                                mobile.ChanceForAttack3 = int.Parse(tokens[ChanceForAttack3Index.Value]);
+                            }
+                            else
+                            {
+                                mobile.ChanceForAttack3 = 25;
+                            }
+                        }
+
+                        if (PrimaryAttackAnimFrames4Index.HasValue)
+                        {
+                            mobile.PrimaryAttackAnimFrames4 = ParseArrayArg(tokens[PrimaryAttackAnimFrames4Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames4Index + 1}");
+                            if (ChanceForAttack4Index.HasValue)
+                            {
+                                mobile.ChanceForAttack4 = int.Parse(tokens[ChanceForAttack4Index.Value]);
+                            }
+                            else
+                            {
+                                mobile.ChanceForAttack4 = 12;
+                            }
+                        }
+
+                        if (PrimaryAttackAnimFrames5Index.HasValue)
+                        {
+                            mobile.PrimaryAttackAnimFrames5 = ParseArrayArg(tokens[PrimaryAttackAnimFrames5Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames5Index + 1}");
+                            if (ChanceForAttack5Index.HasValue)
+                            {
+                                mobile.ChanceForAttack5 = int.Parse(tokens[ChanceForAttack5Index.Value]);
+                            }
+                            else
+                            {
+                                mobile.ChanceForAttack5 = 6;
+                            }
+                        }
+
+                        if (mobile.CastsMagic)
                         {
                             if(mobile.HasRangedAttack1)
                             {
@@ -472,6 +585,26 @@ namespace DaggerfallBestiaryProject
                         {
                             Debug.LogWarning($"Monster '{mobile.ID}' did not have a max damage specified. Defaulting to {mobile.MinDamage + 1}");
                             mobile.MaxDamage = mobile.MinDamage + 1;
+                        }
+
+                        if (MinDamage2Index.HasValue && !string.IsNullOrEmpty(tokens[MinDamage2Index.Value]))
+                        {
+                            mobile.MinDamage2 = int.Parse(tokens[MinDamage2Index.Value]);
+                        }
+
+                        if (MaxDamage2Index.HasValue && !string.IsNullOrEmpty(tokens[MaxDamage2Index.Value]))
+                        {
+                            mobile.MaxDamage2 = int.Parse(tokens[MaxDamage2Index.Value]);
+                        }
+
+                        if (MinDamage3Index.HasValue && !string.IsNullOrEmpty(tokens[MinDamage3Index.Value]))
+                        {
+                            mobile.MinDamage3 = int.Parse(tokens[MinDamage3Index.Value]);
+                        }
+
+                        if (MaxDamage3Index.HasValue && !string.IsNullOrEmpty(tokens[MaxDamage3Index.Value]))
+                        {
+                            mobile.MaxDamage3 = int.Parse(tokens[MaxDamage3Index.Value]);
                         }
 
                         if (MinHealthIndex.HasValue && !string.IsNullOrEmpty(tokens[MinHealthIndex.Value]))
