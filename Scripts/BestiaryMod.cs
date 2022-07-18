@@ -39,9 +39,13 @@ namespace DaggerfallBestiaryProject
             public MobileEnemy mobileEnemy;
             public string name;
             public string career;
-            public int[] spellbook;
+            public string spellbookTable;
             public int onHitEffect;
         }
+
+        private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
+
+        public Dictionary<int, CustomEnemy> CustomEnemies { get { return customEnemies; } }
 
         class EncounterTable
         {
@@ -49,13 +53,27 @@ namespace DaggerfallBestiaryProject
             public int[] enemyIds;
         }
 
-        private Dictionary<int, List<EncounterTable>> dungeonTypeTables = new Dictionary<int, List<EncounterTable>>();
-        private Dictionary<string, EncounterTable> encounterTables = new Dictionary<string, EncounterTable>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<int, List<EncounterTable>> dungeonTypeTables = new Dictionary<int, List<EncounterTable>>();
+        Dictionary<string, EncounterTable> encounterTables = new Dictionary<string, EncounterTable>(StringComparer.OrdinalIgnoreCase);
         bool readDefaultTables = false;
 
-        private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
+        class Spellbook
+        {
+            public int[] spellIds;
+            public int minLevel;
+        }
 
-        public Dictionary<int, CustomEnemy> CustomEnemies { get { return customEnemies; } }
+        class SpellbookTable
+        {
+            public Spellbook[] spellbooks;
+
+            public Spellbook GetSpellbook(int level)
+            {
+                return spellbooks.LastOrDefault(spellbook => level >= spellbook.minLevel);
+            }
+        }
+
+        Dictionary<string, SpellbookTable> spellbookTables = new Dictionary<string, SpellbookTable>(StringComparer.OrdinalIgnoreCase);
 
         // Returns true if the id is a monster id. False if it's a career id
         // The id doesn't have to refer to an actual enemy
@@ -84,6 +102,7 @@ namespace DaggerfallBestiaryProject
             ParseCustomCareers();
             ParseCustomEnemies();
             ParseEncounterTables();
+            ParseSpellbookTables();
 
             EnemyEntity.OnLootSpawned += OnEnemySpawn;
             FormulaHelper.RegisterOverride<Action<EnemyEntity, DaggerfallEntity, int>>(mod, "OnMonsterHit", OnMonsterHit);
@@ -490,10 +509,10 @@ namespace DaggerfallBestiaryProject
 
                         mobile.PrimaryAttackAnimFrames = ParseArrayArg(tokens[PrimaryAttackAnimFramesIndex], $"line={lineNumber}, column={PrimaryAttackAnimFramesIndex+1}");
 
-                        if(PrimaryAttackAnimFrames2Index.HasValue)
+                        if(PrimaryAttackAnimFrames2Index.HasValue && !string.IsNullOrEmpty(tokens[PrimaryAttackAnimFrames2Index.Value]))
                         {
                             mobile.PrimaryAttackAnimFrames2 = ParseArrayArg(tokens[PrimaryAttackAnimFrames2Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames2Index + 1}");
-                            if(ChanceForAttack2Index.HasValue)
+                            if(ChanceForAttack2Index.HasValue && !string.IsNullOrEmpty(tokens[ChanceForAttack2Index.Value]))
                             {
                                 mobile.ChanceForAttack2 = int.Parse(tokens[ChanceForAttack2Index.Value]);
                             }
@@ -503,10 +522,10 @@ namespace DaggerfallBestiaryProject
                             }
                         }
 
-                        if (PrimaryAttackAnimFrames3Index.HasValue)
+                        if (PrimaryAttackAnimFrames3Index.HasValue && !string.IsNullOrEmpty(tokens[PrimaryAttackAnimFrames3Index.Value]))
                         {
                             mobile.PrimaryAttackAnimFrames3 = ParseArrayArg(tokens[PrimaryAttackAnimFrames3Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames3Index + 1}");
-                            if (ChanceForAttack3Index.HasValue)
+                            if (ChanceForAttack3Index.HasValue && !string.IsNullOrEmpty(tokens[ChanceForAttack3Index.Value]))
                             {
                                 mobile.ChanceForAttack3 = int.Parse(tokens[ChanceForAttack3Index.Value]);
                             }
@@ -516,10 +535,10 @@ namespace DaggerfallBestiaryProject
                             }
                         }
 
-                        if (PrimaryAttackAnimFrames4Index.HasValue)
+                        if (PrimaryAttackAnimFrames4Index.HasValue && !string.IsNullOrEmpty(tokens[PrimaryAttackAnimFrames4Index.Value]))
                         {
                             mobile.PrimaryAttackAnimFrames4 = ParseArrayArg(tokens[PrimaryAttackAnimFrames4Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames4Index + 1}");
-                            if (ChanceForAttack4Index.HasValue)
+                            if (ChanceForAttack4Index.HasValue && !string.IsNullOrEmpty(tokens[ChanceForAttack4Index.Value]))
                             {
                                 mobile.ChanceForAttack4 = int.Parse(tokens[ChanceForAttack4Index.Value]);
                             }
@@ -529,10 +548,10 @@ namespace DaggerfallBestiaryProject
                             }
                         }
 
-                        if (PrimaryAttackAnimFrames5Index.HasValue)
+                        if (PrimaryAttackAnimFrames5Index.HasValue && !string.IsNullOrEmpty(tokens[PrimaryAttackAnimFrames5Index.Value]))
                         {
                             mobile.PrimaryAttackAnimFrames5 = ParseArrayArg(tokens[PrimaryAttackAnimFrames5Index.Value], $"line={lineNumber}, column={PrimaryAttackAnimFrames5Index + 1}");
-                            if (ChanceForAttack5Index.HasValue)
+                            if (ChanceForAttack5Index.HasValue && !string.IsNullOrEmpty(tokens[ChanceForAttack5Index.Value]))
                             {
                                 mobile.ChanceForAttack5 = int.Parse(tokens[ChanceForAttack5Index.Value]);
                             }
@@ -727,9 +746,30 @@ namespace DaggerfallBestiaryProject
                         customEnemy.name = tokens[NameIndex];
                         customEnemy.career = tokens[CareerIndex];
 
-                        if(SpellBookIndex.HasValue)
+                        if(SpellBookIndex.HasValue && !string.IsNullOrEmpty(tokens[SpellBookIndex.Value]))
                         {
-                            customEnemy.spellbook = ParseArrayArg(tokens[SpellBookIndex.Value], $"line={lineNumber}, column={SpellBookIndex.Value+1}");
+                            string spellBookToken = tokens[SpellBookIndex.Value];
+
+                            // Raw spellbook
+                            if (char.IsDigit(spellBookToken[0]) || spellBookToken[0] == '[' || spellBookToken[0] == '{')
+                            {
+                                // Add a spellbook named after the mobile id
+                                Spellbook spellbook = new Spellbook();
+                                spellbook.spellIds = ParseArrayArg(spellBookToken, $"line={lineNumber}, column={SpellBookIndex.Value + 1}");
+
+                                SpellbookTable spellbookTable = new SpellbookTable();
+                                spellbookTable.spellbooks = new Spellbook[] { spellbook };
+
+                                string rawSpellbookName = mobile.ID.ToString();
+                                spellbookTables.Add(rawSpellbookName, spellbookTable);
+
+                                customEnemy.spellbookTable = rawSpellbookName;
+                            }
+                            // Try as fixed spellbook type
+                            else
+                            {
+                                customEnemy.spellbookTable = spellBookToken;
+                            }
                         }
 
                         if(OnHitIndex.HasValue && !string.IsNullOrEmpty(tokens[OnHitIndex.Value]))
@@ -769,15 +809,46 @@ namespace DaggerfallBestiaryProject
             if (!customEnemies.TryGetValue(args.MobileEnemy.ID, out CustomEnemy customEnemy))
                 return;
 
-            if (customEnemy.spellbook == null || customEnemy.spellbook.Length == 0)
+            if (!string.IsNullOrEmpty(customEnemy.spellbookTable))
+            {
+                SetEnemySpells(enemyEntity, customEnemy);
+            }
+        }
+
+        void SetEnemySpells(EnemyEntity enemyEntity, in CustomEnemy customEnemy)
+        {
+            if(!spellbookTables.TryGetValue(customEnemy.spellbookTable, out SpellbookTable spellbookTable))
+            {
+                Debug.LogError($"Unknown enemy spell table '{customEnemy.spellbookTable}'");
+                return;
+            }
+
+            Spellbook spellbook = spellbookTable.GetSpellbook(enemyEntity.Level);
+            if(spellbook == null)
                 return;
 
-            // Reset spells, just in case
+                // Reset spells, just in case
             while (enemyEntity.SpellbookCount() > 0)
                 enemyEntity.DeleteSpell(enemyEntity.SpellbookCount() - 1);
 
-            byte[] spellIndices = customEnemy.spellbook.Select(id => (byte)id).ToArray();
-            enemyEntity.SetEnemySpells(spellIndices);
+            foreach (int spellID in spellbook.spellIds)
+            {
+                SpellRecord.SpellRecordData spellData;
+                GameManager.Instance.EntityEffectBroker.GetClassicSpellRecord(spellID, out spellData);
+                if (spellData.index == -1)
+                {
+                    Debug.LogError($"Failed to locate enemy spell '{spellID}' in standard spells list.");
+                    continue;
+                }
+
+                EffectBundleSettings bundle;
+                if (!GameManager.Instance.EntityEffectBroker.ClassicSpellRecordDataToEffectBundleSettings(spellData, BundleTypes.Spell, out bundle))
+                {
+                    Debug.LogError("Failed to create effect bundle for enemy spell: " + spellData.spellName);
+                    continue;
+                }
+                enemyEntity.AddSpell(bundle);
+            }
         }
 
         public void OnMonsterHit(EnemyEntity attacker, DaggerfallEntity target, int damage)
@@ -966,9 +1037,91 @@ namespace DaggerfallBestiaryProject
 
             EncounterTable selectedTable = tables[UnityEngine.Random.Range(0, tables.Count)];
 
-            // Test
             ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[dungeonType];
             table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
+        }
+
+        SpellbookTable MakeSingleSpellbookTable(int[] spells)
+        {
+            return new SpellbookTable()
+            {
+                spellbooks = new Spellbook[]
+                {
+                    new Spellbook { spellIds = spells }
+                }
+            };
+        }
+
+        void ParseSpellbookTables()
+        {
+            int[] ImpSpells = { 0x07, 0x0A, 0x1D, 0x2C };
+            int[] GhostSpells = { 0x22 };
+            int[] OrcShamanSpells = { 0x06, 0x07, 0x16, 0x19, 0x1F };
+            int[] WraithSpells = { 0x1C, 0x1F };
+            int[] FrostDaedraSpells = { 0x10, 0x14 };
+            int[] FireDaedraSpells = { 0x0E, 0x19 };
+            int[] DaedrothSpells = { 0x16, 0x17, 0x1F };
+            int[] VampireSpells = { 0x33 };
+            int[] SeducerSpells = { 0x34, 0x43 };
+            int[] VampireAncientSpells = { 0x08, 0x32 };
+            int[] DaedraLordSpells = { 0x08, 0x0A, 0x0E, 0x3C, 0x43 };
+            int[] LichSpells = { 0x08, 0x0A, 0x0E, 0x22, 0x3C };
+            int[] AncientLichSpells = { 0x08, 0x0A, 0x0E, 0x1D, 0x1F, 0x22, 0x3C };
+
+            spellbookTables.Add("Imp", MakeSingleSpellbookTable(ImpSpells));
+            spellbookTables.Add("Ghost", MakeSingleSpellbookTable(GhostSpells));
+            spellbookTables.Add("OrcShaman", MakeSingleSpellbookTable(OrcShamanSpells));
+            spellbookTables.Add("Wraith", MakeSingleSpellbookTable(WraithSpells));
+            spellbookTables.Add("FrostDaedra", MakeSingleSpellbookTable(FrostDaedraSpells));
+            spellbookTables.Add("FireDaedra", MakeSingleSpellbookTable(FireDaedraSpells));
+            spellbookTables.Add("Daedroth", MakeSingleSpellbookTable(DaedrothSpells));
+            spellbookTables.Add("Vampire", MakeSingleSpellbookTable(VampireSpells));
+            spellbookTables.Add("Seducer", MakeSingleSpellbookTable(SeducerSpells));
+            spellbookTables.Add("VampireAncient", MakeSingleSpellbookTable(VampireAncientSpells));
+            spellbookTables.Add("DaedraLord", MakeSingleSpellbookTable(DaedraLordSpells));
+            spellbookTables.Add("Lich", MakeSingleSpellbookTable(LichSpells));
+            spellbookTables.Add("AncientLich", MakeSingleSpellbookTable(AncientLichSpells));
+
+            spellbookTables.Add("Class", new SpellbookTable()
+            {
+                spellbooks = new Spellbook []
+                {
+                    new Spellbook()
+                    {
+                        spellIds = FrostDaedraSpells,
+                    },
+                    new Spellbook()
+                    {
+                        spellIds = DaedrothSpells,
+                        minLevel = 3
+                    },
+                    new Spellbook()
+                    {
+                        spellIds = OrcShamanSpells,
+                        minLevel = 6
+                    },
+                    new Spellbook()
+                    {
+                        spellIds = VampireAncientSpells,
+                        minLevel = 9
+                    },
+                    new Spellbook()
+                    {
+                        spellIds = DaedraLordSpells,
+                        minLevel = 12
+                    },
+                    new Spellbook()
+                    {
+                        spellIds = LichSpells,
+                        minLevel = 15
+                    },
+                    new Spellbook()
+                    {
+                        spellIds = AncientLichSpells,
+                        minLevel = 18
+                    },
+                }
+            });
         }
     }
 }
