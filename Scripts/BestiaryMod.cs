@@ -187,6 +187,15 @@ namespace DaggerfallBestiaryProject
                     customCareers.Add(career.ToString(), new CustomCareer { dfCareer = dfCareer });
                 }
             }
+
+            {
+                // Handle guard manually, it's not in the enum
+                DFCareer dfCareer = DaggerfallEntity.GetClassCareerTemplate((ClassCareers)18);
+                if (dfCareer != null)
+                {
+                    customCareers.Add("Guard", new CustomCareer { dfCareer = dfCareer });
+                }
+            }
         }
 
         void ParseCustomCareers()
@@ -686,7 +695,6 @@ namespace DaggerfallBestiaryProject
                         }
                         else
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' has no move sound");
                             mobile.MoveSound = -1;
                         }
 
@@ -696,7 +704,6 @@ namespace DaggerfallBestiaryProject
                         }
                         else
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' has no bark sound");
                             mobile.BarkSound = -1;
                         }
 
@@ -706,7 +713,6 @@ namespace DaggerfallBestiaryProject
                         }
                         else
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' has no attack sound");
                             mobile.AttackSound = -1;
                         }
 
