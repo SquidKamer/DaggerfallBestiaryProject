@@ -1,0 +1,20 @@
+[
+    {
+        "index": 500,
+        "spellName": "!BloodSpiderSuck",
+        "element": 2,
+        "rangeType": 1,
+        "icon": 8,
+        "effects": [
+            {
+                "type": 11,
+                "subType": 8,
+                "magnitudeBaseLow": 4,
+                "magnitudeBaseHigh": 4,
+                "magnitudeLevelBase": 1,
+                "magnitudeLevelHigh": 4,
+                "magnitudePerLevel": 1
+            }
+        ]
+    }
+]

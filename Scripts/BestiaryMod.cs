@@ -853,6 +853,17 @@ namespace DaggerfallBestiaryProject
 
         public void OnMonsterHit(EnemyEntity attacker, DaggerfallEntity target, int damage)
         {
+            void SetSpellReady(int spellId)
+            {
+                SpellRecord.SpellRecordData spellData;
+                GameManager.Instance.EntityEffectBroker.GetClassicSpellRecord(spellId, out spellData);
+                EffectBundleSettings bundle;
+                GameManager.Instance.EntityEffectBroker.ClassicSpellRecordDataToEffectBundleSettings(spellData, BundleTypes.Spell, out bundle);
+                EntityEffectBundle spell = new EntityEffectBundle(bundle, attacker.EntityBehaviour);
+                EntityEffectManager attackerEffectManager = attacker.EntityBehaviour.GetComponent<EntityEffectManager>();
+                attackerEffectManager.SetReadySpell(spell, true);
+            }
+
             Diseases[] diseaseListA = { Diseases.Plague };
             Diseases[] diseaseListB = { Diseases.Plague, Diseases.StomachRot, Diseases.BrainFever };
             Diseases[] diseaseListC =
@@ -889,13 +900,7 @@ namespace DaggerfallBestiaryProject
                 EntityEffectManager targetEffectManager = target.EntityBehaviour.GetComponent<EntityEffectManager>();
                 if (targetEffectManager.FindIncumbentEffect<Paralyze>() == null)
                 {
-                    SpellRecord.SpellRecordData spellData;
-                    GameManager.Instance.EntityEffectBroker.GetClassicSpellRecord(66, out spellData);
-                    EffectBundleSettings bundle;
-                    GameManager.Instance.EntityEffectBroker.ClassicSpellRecordDataToEffectBundleSettings(spellData, BundleTypes.Spell, out bundle);
-                    EntityEffectBundle spell = new EntityEffectBundle(bundle, attacker.EntityBehaviour);
-                    EntityEffectManager attackerEffectManager = attacker.EntityBehaviour.GetComponent<EntityEffectManager>();
-                    attackerEffectManager.SetReadySpell(spell, true);
+                    SetSpellReady(66); // Spider Touch
                 }
             }
 			else if(attacker.MobileEnemy.ID == (int)MonsterCareers.Werewolf
@@ -954,6 +959,17 @@ namespace DaggerfallBestiaryProject
                 else if (random <= 2.0f)
                 {
                     FormulaHelper.InflictDisease(attacker, target, diseaseListA);
+                }
+            }
+            else
+            {
+                // Custom effects start at 10
+                switch(customEffect)
+                {
+                    // Blood Spider (level 7) effect
+                    case 10:
+                        SetSpellReady(BestiaryEnemySpells.BloodSpiderSuck);
+                        break;
                 }
             }
         }

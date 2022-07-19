@@ -3658,6 +3658,8 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/KAB - Druid/1509_6-5.PNG",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/KAB - Druid/1509_7-0.xml",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/KAB - Druid/1509_21-2.PNG",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/KAB - Druid/1509_6-3.PNG"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/KAB - Druid/1509_6-3.PNG",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryEnemySpells.cs",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/SpellRecords.json"
     ]
 }
