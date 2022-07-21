@@ -480,6 +480,7 @@ namespace DaggerfallBestiaryProject
                 int? ChanceForAttack4Index = GetIndexOpt("ChanceForAttack4");
                 int? PrimaryAttackAnimFrames5Index = GetIndexOpt("PrimaryAttackAnimFrames5");
                 int? ChanceForAttack5Index = GetIndexOpt("ChanceForAttack5");
+                int? NoShadowIndex = GetIndexOpt("NoShadow");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -745,6 +746,11 @@ namespace DaggerfallBestiaryProject
                             }
                         }
 
+                        if(NoShadowIndex.HasValue && !string.IsNullOrEmpty(tokens[NoShadowIndex.Value]))
+                        {
+                            mobile.NoShadow = ParseBool(tokens[NoShadowIndex.Value], $"line={lineNumber},column={NoShadowIndex.Value}");
+                        }
+
                         if (customEnemies.ContainsKey(mobile.ID))
                             continue;
 
@@ -976,6 +982,11 @@ namespace DaggerfallBestiaryProject
                     // Blood Spider (level 7) effect
                     case 10:
                         SetSpellReady(BestiaryEnemySpells.BloodSpiderSuck);
+                        break;
+
+                    // Gloom Wraith (level 19) effect
+                    case 11:
+                        SetSpellReady(BestiaryEnemySpells.Silence);
                         break;
                 }
             }

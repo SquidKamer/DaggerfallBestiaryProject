@@ -6,6 +6,7 @@ namespace DaggerfallBestiaryProject
 {
     public static class BestiaryEnemySpells
     {
+        public const int Silence = 23;
         public const int BloodSpiderSuck = 500;
     }
 }
