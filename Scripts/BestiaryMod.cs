@@ -99,6 +99,8 @@ namespace DaggerfallBestiaryProject
 
         private void Start()
         {
+            DaggerfallUnity.Instance.TextProvider = new BestiaryTextProvider(DaggerfallUnity.Instance.TextProvider);
+			
             ParseDfCareers();
             ParseCustomCareers();
             ParseCustomEnemies();
