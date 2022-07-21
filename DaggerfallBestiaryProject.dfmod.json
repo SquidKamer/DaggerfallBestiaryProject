@@ -4129,8 +4129,10 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Ghoul/Purp/1630_8-0.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Ghoul/Purp/1630_9-3.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Ghoul/Purp/1630_8-5.png",
-	"Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryEnemySpells.cs",
-	"Assets/Game/Mods/DaggerfallBestiaryProject/SpellRecords.json"
-	
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryEnemySpells.cs",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/SpellRecords.json",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Prefabs/1618_20.prefab",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryTrollCorpseBillboard.cs",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryTrollCorpseEntity.cs"
     ]
 }

@@ -33,6 +33,7 @@ namespace DaggerfallBestiaryProject
         }
 
         private Dictionary<string, CustomCareer> customCareers = new Dictionary<string, CustomCareer>(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, CustomCareer> CustomCareers { get { return customCareers; } }
 
         public struct CustomEnemy
         {
