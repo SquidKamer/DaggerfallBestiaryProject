@@ -18,7 +18,10 @@ namespace DaggerfallBestiaryProject
                 var customEnemies = BestiaryMod.Instance.CustomEnemies;
                 if(customEnemies.TryGetValue(enemyId, out var enemy))
                 {
-                    return enemy.name;
+                    if (!string.IsNullOrEmpty(enemy.name))
+                    {
+                        return enemy.name;
+                    }
                 }
             }
 
