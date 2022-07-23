@@ -1093,6 +1093,11 @@ namespace DaggerfallBestiaryProject
                     case 11:
                         SetSpellReady(BestiaryEnemySpells.Silence);
                         break;
+
+                    // Fire Daemon (level 22) effect
+                    case 12:
+                        SetSpellReady(BestiaryEnemySpells.DaemonFireTouch);
+                        break;
                 }
             }
         }

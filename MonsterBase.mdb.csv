@@ -4,7 +4,7 @@ ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTex
 258,Lizard Man,Lizardman,4,General,Daylight,Scorpions,1601,1601,1601,20,TRUE,,,"{0,1,2,3,4,5,-1,6,6,7}",,,,,1,8,,,13,34,5,400,TRUE,A,204,320,138,TRUE,,,,3,
 259,Lizard Warrior,Lizardman,8,General,Daylight,Scorpions,1607,1601,1601,20,TRUE,,,"{0,1,2,3,4,5,-1,6,6,7}",,,,,6,18,,,17,66,2,600,TRUE,A,204,320,138,TRUE,,,,3,
 260,Bat,GiantBat,1,Flying,Animal,Vermin,1603,1603,401,0,,,,"{0,1,-1,2,3}",,,,,1,4,,,8,14,6,40,,,124,125,126,,,,,2,
-261,Medusa,Medusa,16,General,Darkness,Aquatic,1611,1611,1611,25,TRUE,TRUE,,"{0,1,2,3,4,5,6,-1,7,7,8}",,,,,10,50,,,30,90,0,1200,TRUE,,133,318,-1,,,Dwarven,35,,
+261,Medusa,Medusa,16,General,Darkness,Aquatic,1611,1611,1611,25,TRUE,TRUE,,"{0,1,2,3,4,5,6,-1,7,7,8}",,,,,10,50,,,30,90,0,1200,TRUE,R,133,318,-1,,,Dwarven,35,,
 262,Wolf,Wolf,5,General,Animal,Werecreatures,1612,1612,1612,20,TRUE,,,"{0,0,0,1,-1,2,3,3}",,,,,1,10,,,10,25,7,300,,,142,357,-1,,TRUE,,,,
 263,Snow Wolf,SnowWolf,10,General,Animal,Werecreatures,1615,1615,1615,20,TRUE,,,"{0,0,0,1,-1,2,3,3}",,,,,1,15,,,15,50,2,350,,,142,357,-1,,TRUE,,,,
 264,Hell Hound,HellHound,15,General,Daedra,Daedra,1614,1614,1614,20,TRUE,,,"{0,0,0,1,-1,2,3,3}",,,,,5,25,,,20,75,-2,400,,,142,357,-1,,TRUE,Silver,,,
@@ -12,10 +12,11 @@ ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTex
 266,Skeletal Soldier,SkeletalWarrior,3,General,Undead,Undead,1605,1605,306,1,TRUE,,,"{0,1,2,3,4,-1,5}",,,,,2,12,,,12,18,5,60,TRUE,H,160,161,162,TRUE,TRUE,,,,
 267,Dog,Dog,3,General,Animal,Werecreatures,1613,1613,1613,20,TRUE,,,"{0,0,0,1,-1,2,3,3}",,,,,1,8,,,12,18,6,150,,,142,357,-1,,TRUE,,,,
 268,DemoNymph,Nymph,6,General,Daylight,Nymphs,1604,1604,406,2,TRUE,,,"{0,1,2,3,4,-1,5}",,,,,1,5,,,15,50,0,200,TRUE,C,145,146,147,,,Silver,,5,
-269,Minotaur,Minotaur,15,General,Daylight,Centaurs,1628,1628,1628,20,TRUE,,,"{0,1,2,3,4,-1, 5,6}","{7,8,9,10,-1,11,12,13}",35,,,30,50,,,30,90,0,1000,TRUE,,142,301,,,,,,,
+269,Minotaur,Minotaur,15,General,Daylight,Centaurs,1628,1628,1628,20,TRUE,,,"{0,1,2,3,4,-1, 5,6}","{7,8,9,10,-1,11,12,13}",35,,,30,50,,,30,90,0,1000,TRUE,C,142,301,,,,,,,
 270,Iron Golem,IronGolem,14,General,Golem,Magic,1629,1629,1629,20,TRUE,,,"{0,1,2,3,4,-1,5}","{5,6,7,-1,8,9,10,-1,11,12}",25,"{13,14,15,16,17,18,19,20,-1,21,22}",35,10,20,20,40,19,200,-2,1500,TRUE,,222,422,224,,,Adamantium,,,
 271,Blood Spider,BloodSpider,7,General,Animal,Spiders,1624,1624,1624,20,TRUE,,,"{0, 0, 0, 0, 0, 1, -1, 2}",,,,,1,6,,,15,50,3,350,,,133,337,135,,,,,10,
 272,Troll,Troll,11,General,Darkness,Orcs,1618,1618,1618,20,TRUE,,,"{0,0,1,2,3,-1,4}","{5,6,7,-1,8,9}",50,,,10,30,,,17,100,2,800,TRUE,,222,351,224,,,Silver,,,
-273,Gloom Wraith,Wraith,19,Spectral,Undead,Undead,1622,1622,306,0,TRUE,,,"{0,1,2,3,-1,4}",,,,,30,60,,,30,150,-5,0,,,183,358,185,,TRUE,Mithril,,11,TRUE
-274,Faded Ghost,Ghost,7,Spectral,Undead,Undead,1623,1623,306,0,TRUE,,,"{0,1,2,3,-1,4}",,,,,5,20,,,15,50,0,0,,,183,38,185,,TRUE,Silver,,,TRUE
-275,Vengeful King Lysandus,KingLysandus,26,Spectral,Undead,Undead,1609,1609,306,0,,,,"{0,1,2,-1,3,4,3,-1,2,1}","{0,4,3,-1,2,1}",35,"{0,1,2,-1,3,4,3,-1,2,1,0,1,2,-1,3,4}",20,60,100,40,80,75,125,-15,0,TRUE,,183,455,185,,TRUE,Ebony,,,TRUE
+273,Gloom Wraith,Wraith,19,Spectral,Undead,Undead,1622,1622,306,0,TRUE,,,"{0,1,2,3,-1,4}",,,,,30,60,,,30,150,-5,0,,I,183,358,185,,TRUE,Mithril,,11,TRUE
+274,Faded Ghost,Ghost,7,Spectral,Undead,Undead,1623,1623,306,0,TRUE,,,"{0,1,2,3,-1,4}",,,,,5,20,,,15,50,0,0,,I,183,38,185,,TRUE,Silver,,,TRUE
+275,Vengeful King Lysandus,KingLysandus,26,Spectral,Undead,Undead,1609,1609,306,0,,,,"{0,1,2,-1,3,4,3,-1,2,1}","{0,4,3,-1,2,1}",35,"{0,1,2,-1,3,4,3,-1,2,1,0,1,2,-1,3,4}",20,60,100,40,80,125,200,-15,0,TRUE,I,183,455,185,,TRUE,Ebony,,,TRUE
+276,Fire Daemon,FireDaemon,22,General,Daedra,Daedra,1627,1627,1627,25,TRUE,TRUE,,"{0,1,2,3,4,5,-1,6,7,8}","{9,10,-1,11,12,13,14,15}",35,,,10,40,,,50,200,-5,1000,TRUE,J,192,11,194,,TRUE,Mithril,FireDaedra,12,

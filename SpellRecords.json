@@ -16,5 +16,32 @@
                 "magnitudePerLevel": 1
             }
         ]
+    },
+    {
+        "index": 501,
+        "spellName": "!DaemonFireTouch",
+        "element": 0,
+        "rangeType": 1,
+        "icon": 58,
+        "effects": [
+            {
+                "type": 4,
+                "subType": 0,
+                "magnitudeBaseLow": 1,
+                "magnitudeBaseHigh": 1,
+                "magnitudeLevelBase": 1,
+                "magnitudeLevelHigh": 7,
+                "magnitudePerLevel": 1
+            },
+            {
+                "type": 4,
+                "subType": 2,
+                "magnitudeBaseLow": 1,
+                "magnitudeBaseHigh": 1,
+                "magnitudeLevelBase": 1,
+                "magnitudeLevelHigh": 4,
+                "magnitudePerLevel": 1
+            }
+        ]
     }
 ]

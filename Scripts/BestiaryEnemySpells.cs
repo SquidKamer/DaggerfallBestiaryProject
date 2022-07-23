@@ -8,5 +8,6 @@ namespace DaggerfallBestiaryProject
     {
         public const int Silence = 23;
         public const int BloodSpiderSuck = 500;
+        public const int DaemonFireTouch = 501;
     }
 }
