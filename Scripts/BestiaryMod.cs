@@ -264,6 +264,7 @@ namespace DaggerfallBestiaryProject
                 int? frostToleranceIndex = GetIndexOpt("Frost");
                 int? shockToleranceIndex = GetIndexOpt("Shock");
                 int? poisonToleranceIndex = GetIndexOpt("Poison");
+                int? paralysisToleranceIndex = GetIndexOpt("Paralysis");
                 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -319,6 +320,11 @@ namespace DaggerfallBestiaryProject
                         if (poisonToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[poisonToleranceIndex.Value]))
                         {
                             career.Poison = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[poisonToleranceIndex.Value]);
+                        }
+
+                        if (paralysisToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[paralysisToleranceIndex.Value]))
+                        {
+                            career.Paralysis = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[paralysisToleranceIndex.Value]);
                         }
 
                         CustomCareer customCareer = new CustomCareer();
