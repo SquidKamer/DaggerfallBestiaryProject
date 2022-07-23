@@ -18,3 +18,4 @@ ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTex
 272,Troll,Troll,11,General,Darkness,Orcs,1618,1618,1618,20,TRUE,,,"{0,0,1,2,3,-1,4}","{5,6,7,-1,8,9}",50,,,10,30,,,17,100,2,800,TRUE,,222,351,224,,,Silver,,,
 273,Gloom Wraith,Wraith,19,Spectral,Undead,Undead,1622,1622,306,0,TRUE,,,"{0,1,2,3,-1,4}",,,,,30,60,,,30,150,-5,0,,,183,358,185,,TRUE,Mithril,,11,TRUE
 274,Faded Ghost,Ghost,7,Spectral,Undead,Undead,1623,1623,306,0,TRUE,,,"{0,1,2,3,-1,4}",,,,,5,20,,,15,50,0,0,,,183,38,185,,TRUE,Silver,,,TRUE
+275,Vengeful King Lysandus,KingLysandus,26,Spectral,Undead,Undead,1609,1609,306,0,,,,"{0,1,2,-1,3,4,3,-1,2,1}","{0,4,3,-1,2,1}",35,"{0,1,2,-1,3,4,3,-1,2,1,0,1,2,-1,3,4}",20,60,100,40,80,75,125,-15,0,TRUE,,183,455,185,,TRUE,Ebony,,,TRUE

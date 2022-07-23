@@ -15,3 +15,4 @@ BloodSpider,12,65,30,50,75,70,10,80,50,,,,,,
 Troll,15,80,40,60,80,90,30,50,50,Resistant,CriticalWeakness,Resistant,Resistant,LowTolerance,
 KnightRider,18,60,45,48,20,49,58,75,45,,,,,,Immune
 RogueRider,12,58,40,48,32,50,48,80,44,,,,,,
+KingLysandus,18,90,60,80,75,80,100,70,30,Resistant,,,,Immune,Immune
