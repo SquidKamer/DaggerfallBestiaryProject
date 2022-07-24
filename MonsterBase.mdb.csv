@@ -21,3 +21,4 @@ ID,Name,Career,Level,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTex
 275,Vengeful King Lysandus,KingLysandus,26,Spectral,Undead,Undead,1609,1609,306,0,,,,"{0,1,2,-1,3,4,3,-1,2,1}","{0,4,3,-1,2,1}",35,"{0,1,2,-1,3,4,3,-1,2,1,0,1,2,-1,3,4}",20,60,100,40,80,125,200,-15,0,TRUE,I,183,455,185,,TRUE,Ebony,,,TRUE
 276,Fire Daemon,FireDaemon,22,General,Daedra,Daedra,1627,1627,1627,25,TRUE,TRUE,,"{0,1,2,3,4,5,-1,6,7,8}","{9,10,-1,11,12,13,14,15}",35,,,10,40,,,50,200,-5,1000,TRUE,J,192,11,194,,TRUE,Mithril,FireDaedra,12,
 277,Ghoul,Ghoul,5,General,Undead,Undead,1626,1626,1626,20,TRUE,,,"{0,1,2,3,4,-1,5,6,7,8}","{9,10,11,12,-1,13,14,15,16}",50,,,5,20,,,14,50,8,150,TRUE,H,166,39,168,,,,,7,
+278,Boar,Boar,6,General,Animal,Tigers,1616,1616,1616,20,TRUE,,,"{0,1,2,3,-1,4,5,6}",,,,,1,12,,,15,50,5,500,,,157,102,,,,,,,
