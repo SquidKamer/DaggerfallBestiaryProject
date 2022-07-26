@@ -43,5 +43,35 @@
                 "magnitudePerLevel": 1
             }
         ]
+    },
+    {
+        "index": 502,
+        "spellName": "!WispDrain",
+        "element": 4,
+        "rangeType": 1,
+        "icon": 21,
+        "effects": [
+            {
+                "type": 11,
+                "subType": 8,
+                "magnitudeBaseLow": 1,
+                "magnitudeBaseHigh": 6,
+                "magnitudeLevelBase": 1,
+                "magnitudeLevelHigh": 1,
+                "magnitudePerLevel": 1
+            },
+            {
+                "type": 1,
+                "subType": 2,
+                "durationBase": 1,
+                "durationMod": 1,
+                "durationPerLevel": 4,
+                "magnitudeBaseLow": 1,
+                "magnitudeBaseHigh": 4,
+                "magnitudeLevelBase": 1,
+                "magnitudeLevelHigh": 1,
+                "magnitudePerLevel": 2
+            }
+        ]
     }
 ]

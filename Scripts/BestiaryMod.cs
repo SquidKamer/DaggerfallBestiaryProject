@@ -1098,6 +1098,11 @@ namespace DaggerfallBestiaryProject
                     case 12:
                         SetSpellReady(BestiaryEnemySpells.DaemonFireTouch);
                         break;
+
+                    // Will-o'-wisp (level 9) effect
+                    case 13:
+                        SetSpellReady(BestiaryEnemySpells.WispDrain);
+                        break;
                 }
             }
         }
