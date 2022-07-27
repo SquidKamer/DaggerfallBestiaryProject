@@ -5,6 +5,7 @@ using DaggerfallConnect;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using DaggerfallWorkshop;
@@ -42,6 +43,7 @@ namespace DaggerfallBestiaryProject
             public string career;
             public string spellbookTable;
             public int onHitEffect;
+            public DFBlock.EnemyGenders forcedGender;
         }
 
         private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
@@ -488,6 +490,7 @@ namespace DaggerfallBestiaryProject
                 int? PrimaryAttackAnimFrames5Index = GetIndexOpt("PrimaryAttackAnimFrames5");
                 int? ChanceForAttack5Index = GetIndexOpt("ChanceForAttack5");
                 int? NoShadowIndex = GetIndexOpt("NoShadow");
+                int? ForcedGenderIndex = GetIndexOpt("ForcedGender");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -895,6 +898,11 @@ namespace DaggerfallBestiaryProject
                             customEnemy.onHitEffect = int.Parse(tokens[OnHitIndex.Value]);
                         }
 
+                        if(ForcedGenderIndex.HasValue && !string.IsNullOrEmpty(tokens[ForcedGenderIndex.Value]))
+                        {
+                            customEnemy.forcedGender = (DFBlock.EnemyGenders)Enum.Parse(typeof(DFBlock.EnemyGenders), tokens[ForcedGenderIndex.Value]);
+                        }
+
                         if(!customCareers.TryGetValue(customEnemy.career, out CustomCareer customCareer))
                         {
                             Debug.LogError($"Monster '{mobile.ID}' has unknown career '{customEnemy.career}'");
@@ -930,6 +938,35 @@ namespace DaggerfallBestiaryProject
             if (!string.IsNullOrEmpty(customEnemy.spellbookTable))
             {
                 SetEnemySpells(enemyEntity, customEnemy);
+            }
+
+            // Sometimes we only have archives for one gender. Force the entity gender so we get the correct groans
+            if(customEnemy.forcedGender != DFBlock.EnemyGenders.Unspecified)
+            {
+                // Using reflection, yes
+                MobileUnit enemyMobileUnit = enemyEntity.EntityBehaviour.GetComponentInChildren<MobileUnit>();
+                if (enemyMobileUnit != null)
+                {
+                    FieldInfo enemySummaryField = enemyMobileUnit.GetType().GetField("summary", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    if (enemySummaryField != null)
+                    {
+                        var enemySummary = (MobileUnit.MobileUnitSummary)enemySummaryField.GetValue(enemyMobileUnit);
+
+                        if (customEnemy.forcedGender == DFBlock.EnemyGenders.Male)
+                        {
+                            enemyEntity.Gender = Genders.Male;
+                            enemySummary.Enemy.Gender = MobileGender.Male;
+                        }
+                        else
+                        {
+                            enemyEntity.Gender = Genders.Female;
+                            enemySummary.Enemy.Gender = MobileGender.Female;
+                        }
+
+                        enemySummaryField.SetValue(enemyMobileUnit, enemySummary);
+                    }
+                }
             }
         }
 
