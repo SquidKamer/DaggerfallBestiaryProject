@@ -267,6 +267,11 @@ namespace DaggerfallBestiaryProject
                 int? shockToleranceIndex = GetIndexOpt("Shock");
                 int? poisonToleranceIndex = GetIndexOpt("Poison");
                 int? paralysisToleranceIndex = GetIndexOpt("Paralysis");
+
+                int? UndeadAttackModifierIndex = GetIndexOpt("UndeadAttackModifier");
+                int? DaedraAttackModifierIndex = GetIndexOpt("DaedraAttackModifier");
+                int? HumanoidAttackModifierIndex = GetIndexOpt("HumanoidAttackModifier");
+                int? AnimalsAttackModifierIndex = GetIndexOpt("AnimalsAttackModifier");
                 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -327,6 +332,26 @@ namespace DaggerfallBestiaryProject
                         if (paralysisToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[paralysisToleranceIndex.Value]))
                         {
                             career.Paralysis = (DFCareer.Tolerance)Enum.Parse(typeof(DFCareer.Tolerance), tokens[paralysisToleranceIndex.Value]);
+                        }
+
+                        if (UndeadAttackModifierIndex.HasValue && !string.IsNullOrEmpty(tokens[UndeadAttackModifierIndex.Value]))
+                        {
+                            career.UndeadAttackModifier = (DFCareer.AttackModifier)Enum.Parse(typeof(DFCareer.AttackModifier), tokens[UndeadAttackModifierIndex.Value]);
+                        }
+
+                        if (DaedraAttackModifierIndex.HasValue && !string.IsNullOrEmpty(tokens[DaedraAttackModifierIndex.Value]))
+                        {
+                            career.DaedraAttackModifier = (DFCareer.AttackModifier)Enum.Parse(typeof(DFCareer.AttackModifier), tokens[DaedraAttackModifierIndex.Value]);
+                        }
+
+                        if (HumanoidAttackModifierIndex.HasValue && !string.IsNullOrEmpty(tokens[HumanoidAttackModifierIndex.Value]))
+                        {
+                            career.HumanoidAttackModifier = (DFCareer.AttackModifier)Enum.Parse(typeof(DFCareer.AttackModifier), tokens[HumanoidAttackModifierIndex.Value]);
+                        }
+
+                        if (AnimalsAttackModifierIndex.HasValue && !string.IsNullOrEmpty(tokens[AnimalsAttackModifierIndex.Value]))
+                        {
+                            career.AnimalsAttackModifier = (DFCareer.AttackModifier)Enum.Parse(typeof(DFCareer.AttackModifier), tokens[AnimalsAttackModifierIndex.Value]);
                         }
 
                         CustomCareer customCareer = new CustomCareer();
