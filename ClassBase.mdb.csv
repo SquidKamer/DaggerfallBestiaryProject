@@ -10,4 +10,4 @@ ID,Name,Career,Behaviour,Affinity,Team,MaleTexture,FemaleTexture,CorpseTextureAr
 392,Thief Rider,ThiefRider,General,Human,Criminals,1503,1503,380,1,,,TRUE,,,"{1,2,3,4,5,6,7,-1,0}",,,,,,O,243,244,245,,,,,,Female
 393,Necromancer Glaivier,NecroGlaive,General,Human,Undead,1510,1510,380,1,,,TRUE,TRUE,,"{0,1,2,3,4,5,-1,6,7,8,9,10}","{11,12,13,-1,14,15,16,17,18,-1,19}",35,"{20,-1,21,22,23,24,25}",20,TRUE,P,243,244,245,TRUE,,,Class,,Male
 394,Necromancer Assassin,NecroAss,General,Human,Undead,1515,1515,380,1,,,TRUE,TRUE,TRUE,"{0,1,2,3,4,-1,5,6,7,8,9,10,-1,11}","{12,13,14,15,16,17,-1,18,19,20,21,22,23}",50,,,TRUE,O,243,244,245,TRUE,,,Class,,Female
-395,Dark Brotherhood,DarkBrotherhood,General,Human,Criminals,1513,1514,1513,25,1514,25,TRUE,,TRUE,"{0,1,2,3,-1,4,5,6,7,8,9}","{10,11,-1,12,13,14,15}",35,"{16,17,18,19,20,-1,21,22}",35,TRUE,O,243,244,245,TRUE,,,,,
+395,Dark Slayer,DarkBrotherhood,General,Human,Criminals,1513,1514,1513,25,1514,25,TRUE,,TRUE,"{0,1,2,3,-1,4,5,6,7,8,9}","{10,11,-1,12,13,14,15}",35,"{16,17,18,19,20,-1,21,22}",35,TRUE,O,243,244,245,TRUE,,,,,
