@@ -19,6 +19,7 @@ using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using DaggerfallConnect.Save;
+using DaggerfallConnect.Arena2;
 
 namespace DaggerfallBestiaryProject
 {
@@ -50,7 +51,7 @@ namespace DaggerfallBestiaryProject
 
         public Dictionary<int, CustomEnemy> CustomEnemies { get { return customEnemies; } }
 
-        class EncounterTable
+        public class EncounterTable
         {
             public string name;
             public int[] enemyIds;
@@ -112,14 +113,17 @@ namespace DaggerfallBestiaryProject
             EnemyEntity.OnLootSpawned += OnEnemySpawn;
             FormulaHelper.RegisterOverride<Action<EnemyEntity, DaggerfallEntity, int>>(mod, "OnMonsterHit", OnMonsterHit);
             PlayerEnterExit.OnPreTransition += PlayerEnterExit_OnPreTransition;
+            PlayerGPS.OnEnterLocationRect += PlayerGPS_OnEnterLocationRect;
+            PlayerGPS.OnExitLocationRect += PlayerGPS_OnExitLocationRect;
+            PlayerGPS.OnClimateIndexChanged += PlayerGPS_OnClimateIndexChanged;
         }
 
-        List<EncounterTable> GetDungeonTypeEncounterTables(int dungeonType)
+        List<EncounterTable> GetIndexEncounterTables(int index)
         {
-            if(!dungeonTypeTables.TryGetValue(dungeonType, out List<EncounterTable> encounterTables))
+            if(!dungeonTypeTables.TryGetValue(index, out List<EncounterTable> encounterTables))
             {
                 encounterTables = new List<EncounterTable>();
-                dungeonTypeTables.Add(dungeonType, encounterTables);
+                dungeonTypeTables.Add(index, encounterTables);
             }
 
             return encounterTables;
@@ -130,19 +134,53 @@ namespace DaggerfallBestiaryProject
             // Run this post Start so we can get modded default encounter tables
             if(!readDefaultTables)
             {
+                void CreateDefaultTable(int index, string name)
+                {
+                    if (encounterTables.ContainsKey(name))
+                        return;
+
+                    List<EncounterTable> indexEncounterTables = GetIndexEncounterTables(index);
+
+                    EncounterTable table = new EncounterTable();
+                    table.name = name;
+                    table.enemyIds = RandomEncounters.EncounterTables[index].Enemies.Select(id => (int)id).ToArray();
+
+                    indexEncounterTables.Add(table);
+                    encounterTables.Add(table.name, table);
+                }
+
+                // Parse the 19 dungeon types
                 int dungeonTypeCount = Enum.GetValues(typeof(DFRegion.DungeonTypes)).Length - 1;
 
                 for (int i = 0; i < dungeonTypeCount; ++i)
                 {
-                    List<EncounterTable> dungeonTypeEncounterTables = GetDungeonTypeEncounterTables(i);
-
-                    EncounterTable table = new EncounterTable();
-                    table.name = $"Default{(DFRegion.DungeonTypes)i}";
-                    table.enemyIds = RandomEncounters.EncounterTables[i].Enemies.Select(id => (int)id).ToArray();
-
-                    dungeonTypeEncounterTables.Add(table);
-                    encounterTables.Add(table.name, table);
+                    CreateDefaultTable(i, $"Default{(DFRegion.DungeonTypes)i}");
                 }
+
+                // Parse underwater
+                CreateDefaultTable(19, "DefaultUnderwater");
+
+                // Parse city night for Desert/Subtropical/Swamp/Haunted Woodlands
+                CreateDefaultTable(20, "DefaultDesertCityNight");
+                CreateDefaultTable(21, "DefaultDesertDay");
+                CreateDefaultTable(22, "DefaultDesertNight");
+                CreateDefaultTable(23, "DefaultMountainCityNight");
+                CreateDefaultTable(24, "DefaultMountainDay");
+                CreateDefaultTable(25, "DefaultMountainNight");
+                CreateDefaultTable(26, "DefaultRainforestCityNight");
+                CreateDefaultTable(27, "DefaultRainforestDay");
+                CreateDefaultTable(28, "DefaultRainforestNight");
+                CreateDefaultTable(29, "DefaultSubtropicalCityNight");
+                CreateDefaultTable(30, "DefaultSubtropicalDay");
+                CreateDefaultTable(31, "DefaultSubtropicalNight");
+                CreateDefaultTable(32, "DefaultWoodlandsCityNight");
+                CreateDefaultTable(33, "DefaultWoodlandsDay");
+                CreateDefaultTable(34, "DefaultWoodlandsNight");
+                CreateDefaultTable(35, "DefaultHauntedCityNight");
+                CreateDefaultTable(36, "DefaultHauntedDay");
+                CreateDefaultTable(37, "DefaultHauntedNight");
+
+                // No Building tables for now
 
                 readDefaultTables = true; 
             }
@@ -938,7 +976,12 @@ namespace DaggerfallBestiaryProject
 
                         enemies.Add(mobile);
                         DaggerfallEntity.RegisterCustomCareerTemplate(mobile.ID, customCareer.dfCareer);
-                        questEnemyLines.Add($"{mobile.ID}, {customEnemy.name.Replace(' ', '_')}");
+
+                        string questName = customEnemy.name.Replace(' ', '_');
+                        if (!QuestMachine.Instance.FoesTable.HasValue(questName))
+                        {
+                            questEnemyLines.Add($"{mobile.ID}, {questName}");
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1209,13 +1252,13 @@ namespace DaggerfallBestiaryProject
                         EncounterTable table = new EncounterTable();
                         table.name = tokens[0];
 
-                        var dungeonTypes = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
+                        var tableIndices = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
 
                         table.enemyIds = tokens.Skip(2).Select(id => int.Parse(id)).ToArray();
 
-                        foreach(int dungeonType in dungeonTypes)
+                        foreach(int tableIndex in tableIndices)
                         {
-                            GetDungeonTypeEncounterTables(dungeonType).Add(table);
+                            GetIndexEncounterTables(tableIndex).Add(table);
                         }
                         encounterTables.Add(table.name, table);
                     }
@@ -1227,6 +1270,18 @@ namespace DaggerfallBestiaryProject
             }
         }
 
+        void SelectTable(int index)
+        {
+            List<EncounterTable> tables = GetIndexEncounterTables(index);
+            if (tables == null || tables.Count == 0)
+                return;
+
+            EncounterTable selectedTable = tables[UnityEngine.Random.Range(0, tables.Count)];
+
+            ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[index];
+            table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
+        }
+
         private void PlayerEnterExit_OnPreTransition(PlayerEnterExit.TransitionEventArgs args)
         {
             if (args.TransitionType != PlayerEnterExit.TransitionType.ToDungeonInterior)
@@ -1236,20 +1291,100 @@ namespace DaggerfallBestiaryProject
             if (!location.Loaded || !location.HasDungeon)
                 return; // Shouldn't happen?
 
-            // While DaggerfallConnect doesn't document how to get the dungeon type,
-            // my research has shown this to be accurate
-            int dungeonType = (int)location.MapTableData.DungeonType;
-            if (!Enum.IsDefined(typeof(DFRegion.DungeonTypes), dungeonType))
+            if (!Enum.IsDefined(typeof(DFRegion.DungeonTypes), (int)location.MapTableData.DungeonType))
                 return;
 
-            List<EncounterTable> tables = GetDungeonTypeEncounterTables(dungeonType);
-            if (tables == null || tables.Count == 0)
+            SelectTable((int)location.MapTableData.DungeonType);
+            SelectTable(19); // Pick an underwater one too
+        }
+
+        void SelectClimateTables(int climateIndex)
+        {
+            if (!Enum.IsDefined(typeof(MapsFile.Climates), climateIndex))
                 return;
 
-            EncounterTable selectedTable = tables[UnityEngine.Random.Range(0, tables.Count)];
+            switch ((MapsFile.Climates)climateIndex)
+            {
+                case MapsFile.Climates.Desert:
+                case MapsFile.Climates.Desert2:
+                    SelectTable(21); // Day
+                    SelectTable(22); // Night
+                    break;
 
-            ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[dungeonType];
-            table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
+                case MapsFile.Climates.Mountain:
+                    SelectTable(24); // Day
+                    SelectTable(25); // Night
+                    break;
+
+                case MapsFile.Climates.Rainforest:
+                    SelectTable(27); // Day
+                    SelectTable(28); // Night
+                    break;
+
+                case MapsFile.Climates.Subtropical:
+                    SelectTable(30); // Day
+                    SelectTable(31); // Night
+                    break;
+
+                case MapsFile.Climates.Swamp:
+                case MapsFile.Climates.MountainWoods:
+                case MapsFile.Climates.Woodlands:
+                    SelectTable(33); // Day
+                    SelectTable(34); // Night
+                    break;
+
+                case MapsFile.Climates.HauntedWoodlands:
+                    SelectTable(36); // Day
+                    SelectTable(37); // Night
+                    break;
+            }
+        }
+
+        private void PlayerGPS_OnClimateIndexChanged(int climateIndex)
+        {
+            SelectClimateTables(climateIndex);
+        }
+
+        private void PlayerGPS_OnExitLocationRect()
+        {
+            SelectClimateTables(GameManager.Instance.PlayerGPS.CurrentClimateIndex);
+        }
+
+        private void PlayerGPS_OnEnterLocationRect(DFLocation location)
+        {
+            int climateIndex = GameManager.Instance.PlayerGPS.CurrentClimateIndex;
+            if (!Enum.IsDefined(typeof(MapsFile.Climates), climateIndex))
+                return;
+
+            switch ((MapsFile.Climates)climateIndex)
+            {
+                case MapsFile.Climates.Desert:
+                case MapsFile.Climates.Desert2:
+                    SelectTable(20); // City Night
+                    break;
+
+                case MapsFile.Climates.Mountain:
+                    SelectTable(23); // City Night
+                    break;
+
+                case MapsFile.Climates.Rainforest:
+                    SelectTable(26); // City Night
+                    break;
+
+                case MapsFile.Climates.Subtropical:
+                    SelectTable(29); // City Night
+                    break;
+
+                case MapsFile.Climates.Swamp:
+                case MapsFile.Climates.MountainWoods:
+                case MapsFile.Climates.Woodlands:
+                    SelectTable(32); // City Night
+                    break;
+
+                case MapsFile.Climates.HauntedWoodlands:
+                    SelectTable(35); // City Night
+                    break;
+            }
         }
 
         SpellbookTable MakeSingleSpellbookTable(int[] spells)

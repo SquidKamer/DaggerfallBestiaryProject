@@ -1270,7 +1270,6 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Medusa/1611_1-3.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Medusa/1611_2-1.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Medusa/1611_2-5.png",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/EncounterTableBase.tdb.csv",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Medusa/1611_0-0.xml",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Medusa/1611_6-0.xml",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Medusa/1611_20-0.xml",
@@ -5350,6 +5349,7 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/BATTLESPIRE - DREMORA/1708_5-5.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/BATTLESPIRE - DREMORA/1708_0-0.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/BATTLESPIRE - DREMORA/1708_21-2.png",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/BATTLESPIRE - DREMORA/1708_6-1.png"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/BATTLESPIRE - DREMORA/1708_6-1.png",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/DefaultTableReplacement.tdb.csv"
     ]
 }
