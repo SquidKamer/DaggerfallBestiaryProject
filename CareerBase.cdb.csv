@@ -31,4 +31,7 @@ RoyalKnight,20,70,50,58,50,60,68,55,40,,,,,,Immune,
 ThiefRider,10,45,47,45,28,50,47,88,50,,,,,,,
 IceGolem,15,110,30,70,90,75,30,55,60,Immune,LowTolerance,Immune,Normal,Immune,Immune,Bonus
 NecroGlaive,12,60,54,42,52,50,45,47,50,,,,,,,
-NecroAss,10,55,55,40,55,52,45,50,48,,,,,,,
+NecroAss,10,55,55,40,55,52,45,50,48,,,,,,,Bonus
+Dremora,8,65,50,70,45,50,35,50,45,,,,,,,
+StoneGolem,8,90,30,70,60,75,30,40,50,Immune,,,,Immune,Immune,Bonus
+DarkBrotherhood,12,75,50,50,80,60,50,60,50,,,,,,,Bonus
