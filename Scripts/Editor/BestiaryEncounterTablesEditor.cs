@@ -40,7 +40,11 @@ namespace DaggerfallBestiaryProject
         Dictionary<int, CustomEnemy> customEnemyDb = new Dictionary<int, CustomEnemy>();
 
         Dictionary<MobileTeams, int> currentTableTeamCounts;
+        Dictionary<int, int> classicEnemyUseCount;
+        Dictionary<int, int> customEnemyUseCount;
 
+        Vector2 scroll1Pos;
+        Vector2 scroll2Pos;
         
         [MenuItem("Daggerfall Tools/Encounter Tables Editor")]
         static void Init()
@@ -111,6 +115,7 @@ namespace DaggerfallBestiaryProject
                         activeEncounterTable = null;
                         currentTableTeamCounts = null;
                         LoadActiveFile();
+                        LoadFileStatistics();
                     }
 
                     GenericMenu menu = new GenericMenu();
@@ -143,6 +148,8 @@ namespace DaggerfallBestiaryProject
 
                         GenericMenu menu = new GenericMenu();
 
+                        menu.AddItem(new GUIContent("--"), string.IsNullOrEmpty(activeEncounterTable), (_) => { activeEncounterTable = null; }, null);
+
                         foreach (EncounterTable table in activeFileEncounterTables)
                         {
                             menu.AddItem(new GUIContent(table.Name), activeEncounterTable == table.Name, OnItemClicked, table.Name);
@@ -155,15 +162,15 @@ namespace DaggerfallBestiaryProject
                     baseY += 20;
                 }
 
-                if(!string.IsNullOrEmpty(activeEncounterTable))
-                {
-                    baseY += 24; // Spacing
+                baseY += 24; // Spacing
 
+                if (!string.IsNullOrEmpty(activeEncounterTable))
+                {
                     EncounterTable tableData = activeFileEncounterTables.First(table => table.Name == activeEncounterTable);
 
                     GUI.Label(new Rect(baseX + 4, baseY + 4, 84, 16), "Tables: ");
 
-                    for(int i = 0; i < tableData.TableIndices.Length; ++i)
+                    for (int i = 0; i < tableData.TableIndices.Length; ++i)
                     {
                         int tableIndex = tableData.TableIndices[i];
                         GUI.Label(new Rect(baseX + 8, baseY + 24 + i * 24, 148, 20), TableIndexToName(tableIndex));
@@ -173,12 +180,16 @@ namespace DaggerfallBestiaryProject
 
                     GUI.Label(new Rect(baseX + 4, baseY + 4, 84, 16), "Enemies: ");
 
-                    for(int i = 0; i < tableData.EnemyIds.Length; ++i)
+                    for (int i = 0; i < tableData.EnemyIds.Length; ++i)
                     {
                         int enemyId = tableData.EnemyIds[i];
 
                         string enemyName;
-                        if (Enum.IsDefined(typeof(MobileTypes), enemyId))
+                        if(enemyId == -1)
+                        {
+                            enemyName = null;
+                        }
+                        else if (Enum.IsDefined(typeof(MobileTypes), enemyId))
                         {
                             enemyName = ((MobileTypes)enemyId).ToString();
                         }
@@ -191,18 +202,21 @@ namespace DaggerfallBestiaryProject
                             enemyName = $"Unknown id '{enemyId}'";
                         }
 
-                        GUI.Label(new Rect(baseX + 8, baseY + 24 + i * 24, 204, 20), $"{i+1:D2}. ({enemyId:D3}) {enemyName}");
+                        if(enemyId != -1)
+                            GUI.Label(new Rect(baseX + 8, baseY + 24 + i * 24, 204, 20), $"{i + 1:D2}. ({enemyId:D3}) {enemyName}");
+                        else
+                            GUI.Label(new Rect(baseX + 8, baseY + 24 + i * 24, 204, 20), $"{i + 1:D2}. [EMPTY]");
                     }
 
                     baseX += 212;
-
-                    
 
                     GUI.Label(new Rect(baseX + 4, baseY + 4, 84, 16), "Level: ");
 
                     for (int i = 0; i < tableData.EnemyIds.Length; ++i)
                     {
                         int enemyId = tableData.EnemyIds[i];
+                        if (enemyId == -1)
+                            continue;
 
                         int enemyLevel;
                         if (Enum.IsDefined(typeof(MobileTypes), enemyId))
@@ -233,7 +247,7 @@ namespace DaggerfallBestiaryProject
                         var teamCountEntries = currentTableTeamCounts.ToList();
                         teamCountEntries.Sort((tc1, tc2) => tc2.Value.CompareTo(tc1.Value));
 
-                        for(int i = 0; i < teamCountEntries.Count; ++i)
+                        for (int i = 0; i < teamCountEntries.Count; ++i)
                         {
                             var tableCountPair = teamCountEntries[i];
                             var team = tableCountPair.Key;
@@ -241,6 +255,72 @@ namespace DaggerfallBestiaryProject
 
                             GUI.Label(new Rect(baseX + 8, baseY + 24 + i * 24, 148, 20), $"{team}: {count}");
                         }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(activeFile)) // string.IsNullOrEmpty(activeEncounterTable)
+                {
+                    GUI.Label(new Rect(baseX + 4, baseY + 4, 104, 16), "Classic enemy:");
+                    GUI.Label(new Rect(baseX + 112, baseY + 4, 84, 16), "Use count:");
+
+                    float availableHeight = position.height - baseY - 24;
+                    scroll1Pos = GUI.BeginScrollView(new Rect(baseX + 4, baseY + 24, 200, availableHeight - 4), scroll1Pos, new Rect(0, 0, 180, customEnemyDb.Keys.Count * 24), false, true);
+
+                    try
+                    {
+                        int i = 0;
+                        foreach (var mobileType in Enum.GetValues(typeof(MobileTypes)).Cast<MobileTypes>())
+                        {
+                            GUI.Label(new Rect(0, 24 * i, 104, 16), mobileType.ToString());
+
+                            if (classicEnemyUseCount.TryGetValue((int)mobileType, out int useCount))
+                            {
+                                GUI.Label(new Rect(108, 24 * i, 84, 16), useCount.ToString());
+                            }
+                            else
+                            {
+                                GUI.Label(new Rect(108, 24 * i, 84, 16), "0");
+                            }
+
+                            ++i;
+                        }
+                    }
+                    finally
+                    {
+                        GUI.EndScrollView();
+                    }
+
+                    baseX += 216;
+
+                    GUI.Label(new Rect(baseX + 4, baseY + 4, 104, 16), "Custom enemy:");
+                    GUI.Label(new Rect(baseX + 112, baseY + 4, 84, 16), "Use count:");
+
+                    availableHeight = position.height - baseY - 24;
+                    scroll2Pos = GUI.BeginScrollView(new Rect(baseX + 4, baseY + 24, 200, availableHeight - 4), scroll2Pos, new Rect(0, 0, 180, customEnemyDb.Keys.Count * 24), false, true);
+
+                    try
+                    {
+                        int i = 0;
+                        foreach (var enemyPair in customEnemyDb)
+                        {
+                            CustomEnemy enemy = enemyPair.Value;
+
+                            GUI.Label(new Rect(0, 24 * i, 104, 16), enemy.Name);
+
+                            if (customEnemyUseCount.TryGetValue(enemy.Id, out int useCount))
+                            {
+                                GUI.Label(new Rect(108, 24 * i, 84, 16), useCount.ToString());
+                            }
+                            else
+                            {
+                                GUI.Label(new Rect(108, 24 * i, 84, 16), "0");
+                            }
+
+                            ++i;
+                        }
+                    }
+                    finally
+                    {
+                        GUI.EndScrollView();
                     }
                 }
             }
@@ -459,7 +539,7 @@ namespace DaggerfallBestiaryProject
                     EncounterTable table = new EncounterTable();
                     table.Name = tokens[0];
                     table.TableIndices = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
-                    table.EnemyIds = tokens.Skip(2).Select(id => int.Parse(id)).ToArray();
+                    table.EnemyIds = tokens.Skip(2).Select(id => !string.IsNullOrEmpty(id) ? int.Parse(id) : -1).ToArray();
 
                     encounterTables.Add(table);
                 }
@@ -479,11 +559,50 @@ namespace DaggerfallBestiaryProject
                 activeEncounterTableIndex = Array.FindIndex(activeFileEncounterTables, t => t.Name == activeEncounterTable);
 
             LoadActiveFile();
+            LoadFileStatistics();
 
             if (activeEncounterTableIndex != -1)
             {
                 activeEncounterTable = activeFileEncounterTables[activeEncounterTableIndex].Name;
                 LoadTableStatistics();
+            }
+        }
+
+        void LoadFileStatistics()
+        {
+            classicEnemyUseCount = new Dictionary<int, int>();
+            customEnemyUseCount = new Dictionary<int, int>();
+
+            foreach(var encounterTable in activeFileEncounterTables)
+            {
+                foreach(var enemyId in encounterTable.EnemyIds)
+                {
+                    if (enemyId == -1)
+                        continue;
+
+                    if(Enum.IsDefined(typeof(MobileTypes), enemyId))
+                    {
+                        if(classicEnemyUseCount.TryGetValue(enemyId, out int previousCount))
+                        {
+                            classicEnemyUseCount[enemyId] = previousCount + 1;
+                        }
+                        else
+                        {
+                            classicEnemyUseCount.Add(enemyId, 1);
+                        }
+                    }
+                    else if (customEnemyDb.ContainsKey(enemyId))
+                    {
+                        if (customEnemyUseCount­.TryGetValue(enemyId, out int previousCount))
+                        {
+                            customEnemyUseCount[enemyId] = previousCount + 1;
+                        }
+                        else
+                        {
+                            customEnemyUseCount.Add(enemyId, 1);
+                        }
+                    }
+                }
             }
         }
 
@@ -495,6 +614,9 @@ namespace DaggerfallBestiaryProject
 
             foreach(int enemyId in tableData.EnemyIds)
             {
+                if (enemyId == -1)
+                    continue;
+
                 if (Enum.IsDefined(typeof(MobileTypes), enemyId))
                 {
                     MobileEnemy enemy = EnemyBasics.Enemies.First(e => e.ID == enemyId);
