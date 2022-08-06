@@ -29,7 +29,7 @@ namespace DaggerfallBestiaryProject
 
         public static BestiaryMod Instance { get; private set; }
 
-        public struct CustomCareer
+        public class CustomCareer
         {
             public DFCareer dfCareer;
         }
@@ -37,7 +37,7 @@ namespace DaggerfallBestiaryProject
         private Dictionary<string, CustomCareer> customCareers = new Dictionary<string, CustomCareer>(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, CustomCareer> CustomCareers { get { return customCareers; } }
 
-        public struct CustomEnemy
+        public class CustomEnemy
         {
             public MobileEnemy mobileEnemy;
             public string name;
@@ -186,9 +186,9 @@ namespace DaggerfallBestiaryProject
             }
         }
 
-        IEnumerable<Mod> EnumerateEnabledModsReverse()
+        IEnumerable<Mod> EnumerateEnabledMods()
         {
-            IEnumerable<Mod> query = ModManager.Instance.EnumerateModsReverse();
+            IEnumerable<Mod> query = ModManager.Instance.Mods;
 
             return query.Where(x => x.Enabled);
         }
@@ -196,7 +196,7 @@ namespace DaggerfallBestiaryProject
         IEnumerable<TextAsset> GetDBAssets(string extension)
         {
             HashSet<string> names = new HashSet<string>();
-            foreach(Mod mod in EnumerateEnabledModsReverse())
+            foreach(Mod mod in EnumerateEnabledMods())
             {
                 foreach(string file in mod.ModInfo.Files.Where(filePath => filePath.EndsWith(extension)).Select(filePath => Path.GetFileName(filePath)))
                 {
@@ -289,15 +289,16 @@ namespace DaggerfallBestiaryProject
                 }
 
                 if (!GetIndex("Name", out int NameIndex)) continue;
-                if (!GetIndex("HitPointsPerLevel", out int HPIndex)) continue;
-                if (!GetIndex("Strength", out int StrengthIndex)) continue;
-                if (!GetIndex("Intelligence", out int IntelligenceIndex)) continue;
-                if (!GetIndex("Willpower", out int WillpowerIndex)) continue;
-                if (!GetIndex("Agility", out int AgilityIndex)) continue;
-                if (!GetIndex("Endurance", out int EnduranceIndex)) continue;
-                if (!GetIndex("Personality", out int PersonalityIndex)) continue;
-                if (!GetIndex("Speed", out int SpeedIndex)) continue;
-                if (!GetIndex("Luck", out int LuckIndex)) continue;
+
+                int? HPIndex = GetIndexOpt("HitPointsPerLevel");
+                int? StrengthIndex = GetIndexOpt("Strength");
+                int? IntelligenceIndex = GetIndexOpt("Intelligence");
+                int? WillpowerIndex = GetIndexOpt("Willpower");
+                int? AgilityIndex = GetIndexOpt("Agility");
+                int? EnduranceIndex = GetIndexOpt("Endurance");
+                int? PersonalityIndex = GetIndexOpt("Personality");
+                int? SpeedIndex = GetIndexOpt("Speed");
+                int? LuckIndex = GetIndexOpt("Luck");
 
                 int? magicToleranceIndex = GetIndexOpt("Magic");
                 int? fireToleranceIndex = GetIndexOpt("Fire");
@@ -323,24 +324,121 @@ namespace DaggerfallBestiaryProject
                     {
                         string[] tokens = SplitCsvLine(line);
 
-                        DFCareer career = new DFCareer();
+                        string careerName = tokens[NameIndex];
 
-                        career.Name = tokens[NameIndex];
+                        bool replacement;
+                        DFCareer career;
+                        if (customCareers.TryGetValue(careerName, out CustomCareer existingCustomCareer))
+                        {
+                            replacement = true;
+                            career = existingCustomCareer.dfCareer;
+                        }
+                        else
+                        {
+                            replacement = false;
+                            career = new DFCareer();
+                            career.Name = careerName;
+                        }
 
-                        // Skip careers we've already assigned
-                        // FindAssets traverses mods from high to low priority, so the first mod in this list wins
-                        if (customCareers.ContainsKey(career.Name))
+                        if (HPIndex.HasValue && !string.IsNullOrEmpty(tokens[HPIndex.Value]))
+                        {
+                            career.HitPointsPerLevel = int.Parse(tokens[HPIndex.Value], cultureInfo);
+                        }
+                        else if(!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have HitPointsPerLevel specified");
                             continue;
+                        }
 
-                        career.HitPointsPerLevel = int.Parse(tokens[HPIndex], cultureInfo);
-                        career.Strength = int.Parse(tokens[StrengthIndex], cultureInfo);
-                        career.Intelligence = int.Parse(tokens[IntelligenceIndex], cultureInfo);
-                        career.Willpower = int.Parse(tokens[WillpowerIndex], cultureInfo);
-                        career.Agility = int.Parse(tokens[AgilityIndex], cultureInfo);
-                        career.Endurance = int.Parse(tokens[EnduranceIndex], cultureInfo);
-                        career.Personality = int.Parse(tokens[PersonalityIndex], cultureInfo);
-                        career.Speed = int.Parse(tokens[SpeedIndex], cultureInfo);
-                        career.Luck = int.Parse(tokens[LuckIndex], cultureInfo);
+                        if (StrengthIndex.HasValue && !string.IsNullOrEmpty(tokens[StrengthIndex.Value]))
+                        {
+                            career.Strength = int.Parse(tokens[StrengthIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Strength specified");
+                            continue;
+                        }
+
+                        if (IntelligenceIndex.HasValue && !string.IsNullOrEmpty(tokens[IntelligenceIndex.Value]))
+                        {
+                            career.Intelligence = int.Parse(tokens[IntelligenceIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Intelligence specified");
+                            continue;
+                        }
+
+                        if (WillpowerIndex.HasValue && !string.IsNullOrEmpty(tokens[WillpowerIndex.Value]))
+                        {
+                            career.Willpower = int.Parse(tokens[WillpowerIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Willpower specified");
+                            continue;
+                        }
+
+                        if (AgilityIndex.HasValue && !string.IsNullOrEmpty(tokens[AgilityIndex.Value]))
+                        {
+                            career.Agility = int.Parse(tokens[AgilityIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Agility specified");
+                            continue;
+                        }
+
+                        if (EnduranceIndex.HasValue && !string.IsNullOrEmpty(tokens[EnduranceIndex.Value]))
+                        {
+                            career.Endurance = int.Parse(tokens[EnduranceIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Strength specified");
+                            continue;
+                        }
+
+                        if (EnduranceIndex.HasValue && !string.IsNullOrEmpty(tokens[EnduranceIndex.Value]))
+                        {
+                            career.Endurance = int.Parse(tokens[EnduranceIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Strength specified");
+                            continue;
+                        }
+
+                        if (PersonalityIndex.HasValue && !string.IsNullOrEmpty(tokens[PersonalityIndex.Value]))
+                        {
+                            career.Personality = int.Parse(tokens[PersonalityIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Personality specified");
+                            continue;
+                        }
+
+                        if (SpeedIndex.HasValue && !string.IsNullOrEmpty(tokens[SpeedIndex.Value]))
+                        {
+                            career.Speed = int.Parse(tokens[SpeedIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Speed specified");
+                            continue;
+                        }
+
+                        if (LuckIndex.HasValue && !string.IsNullOrEmpty(tokens[LuckIndex.Value]))
+                        {
+                            career.Luck = int.Parse(tokens[LuckIndex.Value], cultureInfo);
+                        }
+                        else if (!replacement)
+                        {
+                            Debug.LogError($"Career '{career.Name}' did not have Luck specified");
+                            continue;
+                        }
 
                         if(magicToleranceIndex.HasValue && !string.IsNullOrEmpty(tokens[magicToleranceIndex.Value]))
                         {
@@ -392,10 +490,13 @@ namespace DaggerfallBestiaryProject
                             career.AnimalsAttackModifier = (DFCareer.AttackModifier)Enum.Parse(typeof(DFCareer.AttackModifier), tokens[AnimalsAttackModifierIndex.Value]);
                         }
 
-                        CustomCareer customCareer = new CustomCareer();
-                        customCareer.dfCareer = career;
+                        if (!replacement)
+                        {
+                            CustomCareer customCareer = new CustomCareer();
+                            customCareer.dfCareer = career;
 
-                        customCareers.Add(career.Name, customCareer);
+                            customCareers.Add(career.Name, customCareer);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -467,6 +568,8 @@ namespace DaggerfallBestiaryProject
                 var stream = new StreamReader(new MemoryStream(asset.bytes));
 
                 string header = stream.ReadLine();
+                if (header == null)
+                    continue;
 
                 string[] fields = header.Split(';', ',');
 
@@ -568,15 +671,12 @@ namespace DaggerfallBestiaryProject
                         string[] tokens = SplitCsvLine(line);
 
                         int mobileID = int.Parse(tokens[IdIndex]);
-
-                        if (customEnemies.ContainsKey(mobileID))
-                            continue;
-
+                                                
                         MobileEnemy mobile;
 
                         bool enemyReplacement = false;
                         int enemyReplacementIndex = -1;
-                        if (Enum.IsDefined(typeof(MobileTypes), mobileID))
+                        if (Enum.IsDefined(typeof(MobileTypes), mobileID) || customEnemies.ContainsKey(mobileID))
                         {
                             enemyReplacementIndex = enemies.FindIndex(m => m.ID == mobileID);
                             mobile = enemies[enemyReplacementIndex];
@@ -585,9 +685,9 @@ namespace DaggerfallBestiaryProject
                         else
                         {
                             mobile = new MobileEnemy();
+                            mobile.ID = mobileID;
                         }
 
-                        mobile.ID = mobileID;
                         if (BehaviourIndex.HasValue && !string.IsNullOrEmpty(tokens[BehaviourIndex.Value]))
                         {
                             mobile.Behaviour = (MobileBehaviour)Enum.Parse(typeof(MobileBehaviour), tokens[BehaviourIndex.Value], ignoreCase: true);
@@ -901,20 +1001,24 @@ namespace DaggerfallBestiaryProject
                             mobile.NoShadow = ParseBool(tokens[NoShadowIndex.Value], $"line={lineNumber},column={NoShadowIndex.Value}");
                         }
 
-                        if(enemyReplacement)
+                        // Classic replacement stops here
+                        CustomEnemy customEnemy;
+                        if (Enum.IsDefined(typeof(MobileTypes), mobileID))
                         {
                             enemies[enemyReplacementIndex] = mobile;
                             continue;
                         }
-
-                        CustomEnemy customEnemy = new CustomEnemy();
-                        customEnemy.mobileEnemy = mobile;
-
+                        else if(!customEnemies.TryGetValue(mobileID, out customEnemy))
+                        {                            
+                            customEnemy = new CustomEnemy();
+                            customEnemy.mobileEnemy = mobile;
+                        }
+                        
                         if (NameIndex.HasValue && !string.IsNullOrEmpty(tokens[NameIndex.Value]))
                         {
                             customEnemy.name = tokens[NameIndex.Value];
                         }
-                        else
+                        else if(!enemyReplacement)
                         {
                             Debug.LogError($"Monster '{mobile.ID}' did not have a Name specified.");
                             continue;
@@ -924,7 +1028,7 @@ namespace DaggerfallBestiaryProject
                         {
                             customEnemy.career = tokens[CareerIndex.Value];
                         }
-                        else
+                        else if(!enemyReplacement)
                         {
                             Debug.LogError($"Monster '{mobile.ID}' did not have a Career specified.");
                             continue;
@@ -972,9 +1076,12 @@ namespace DaggerfallBestiaryProject
                             continue;
                         }
 
-                        customEnemies.Add(mobile.ID, customEnemy);
-
-                        enemies.Add(mobile);
+                        if (!enemyReplacement)
+                        {
+                            customEnemies.Add(mobile.ID, customEnemy);
+                            enemies.Add(mobile);
+                        }
+                                                
                         DaggerfallEntity.RegisterCustomCareerTemplate(mobile.ID, customCareer.dfCareer);
 
                         string questName = customEnemy.name.Replace(' ', '_');
