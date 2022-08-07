@@ -658,6 +658,7 @@ namespace DaggerfallBestiaryProject
                 int? ChanceForAttack5Index = GetIndexOpt("ChanceForAttack5");
                 int? NoShadowIndex = GetIndexOpt("NoShadow");
                 int? ForcedGenderIndex = GetIndexOpt("ForcedGender");
+                int? GlowColorIndex = GetIndexOpt("GlowColor");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -1006,6 +1007,19 @@ namespace DaggerfallBestiaryProject
                         if(NoShadowIndex.HasValue && !string.IsNullOrEmpty(tokens[NoShadowIndex.Value]))
                         {
                             mobile.NoShadow = ParseBool(tokens[NoShadowIndex.Value], $"line={lineNumber},column={NoShadowIndex.Value}");
+                        }
+
+                        if(GlowColorIndex.HasValue && !string.IsNullOrEmpty(tokens[GlowColorIndex.Value]))
+                        {
+                            if(ColorUtility.TryParseHtmlString(tokens[GlowColorIndex.Value], out Color parsedColor))
+                            {
+                                mobile.GlowColor = parsedColor;
+                                mobile.NoShadow = true;
+                            }
+                            else
+                            {
+                                Debug.LogError($"Monster '{mobileID}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
+                            }                            
                         }
 
                         // Classic replacement stops here
