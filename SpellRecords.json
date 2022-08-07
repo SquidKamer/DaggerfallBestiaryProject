@@ -73,5 +73,32 @@
                 "magnitudePerLevel": 2
             }
         ]
+    },
+    {
+        "index": 503,
+        "spellName": "!VengeanceBolt",
+        "element": 3,
+        "rangeType": 4,
+        "icon": 39,
+        "effects": [
+            {
+                "type": 4,
+                "subType": 0,
+                "magnitudeBaseLow": 1,
+                "magnitudeBaseHigh": 25,
+                "magnitudeLevelBase": 1,
+                "magnitudeLevelHigh": 5,
+                "magnitudePerLevel": 1
+            },
+            {
+                "type": 7,
+                "subType": 3,
+                "magnitudeBaseLow": 1,
+                "magnitudeBaseHigh": 10,
+                "magnitudeLevelBase": 0,
+                "magnitudeLevelHigh": 0,
+                "magnitudePerLevel": 1
+            }
+        ]
     }
 ]

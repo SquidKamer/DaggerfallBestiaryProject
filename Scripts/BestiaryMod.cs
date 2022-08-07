@@ -619,6 +619,7 @@ namespace DaggerfallBestiaryProject
                 int? CorpseTextureRecordIndex = GetIndexOpt("CorpseTextureRecord");
                 int? HasIdleIndex = GetIndexOpt("HasIdle");
                 int? CastsMagicIndex = GetIndexOpt("CastsMagic");
+                int? NoSpellAnimsIndex = GetIndexOpt("NoSpellAnims");
                 int? HasRangedAttackIndex = GetIndexOpt("HasRangedAttack");
                 int? PrimaryAttackAnimFramesIndex = GetIndexOpt("PrimaryAttackAnimFrames");
                 int? TeamIndex = GetIndexOpt("Team");
@@ -749,6 +750,12 @@ namespace DaggerfallBestiaryProject
                         if (CastsMagicIndex.HasValue && !string.IsNullOrEmpty(tokens[CastsMagicIndex.Value]))
                         {
                             mobile.CastsMagic = ParseBool(tokens[CastsMagicIndex.Value], $"line={lineNumber}, column={CastsMagicIndex + 1}");
+                            mobile.HasSpellAnimation = mobile.CastsMagic;
+                        }
+
+                        if (NoSpellAnimsIndex.HasValue && !string.IsNullOrEmpty(tokens[NoSpellAnimsIndex.Value]))
+                        {
+                            mobile.HasSpellAnimation = !ParseBool(tokens[NoSpellAnimsIndex.Value], $"line={lineNumber}, column={NoSpellAnimsIndex + 1}");
                         }
 
                         if (HasRangedAttackIndex.HasValue && !string.IsNullOrEmpty(tokens[HasRangedAttackIndex.Value]))
@@ -1157,9 +1164,16 @@ namespace DaggerfallBestiaryProject
             if(spellbook == null)
                 return;
 
-                // Reset spells, just in case
+            // Reset spells, just in case
             while (enemyEntity.SpellbookCount() > 0)
                 enemyEntity.DeleteSpell(enemyEntity.SpellbookCount() - 1);
+
+            // Custom monsters haven't had its magicka stats set
+            // Call SetEnemySpells with an empty list to initialize the stat
+            if (enemyEntity.EntityType == EntityTypes.EnemyMonster)
+            {
+                enemyEntity.SetEnemySpells(new byte[] {});
+            }
 
             foreach (int spellID in spellbook.spellIds)
             {
