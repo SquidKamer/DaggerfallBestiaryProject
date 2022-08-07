@@ -545,6 +545,26 @@ namespace DaggerfallBestiaryProject
             return Frames.Select(Frame => string.IsNullOrEmpty(Frame) ? "-1" : Frame).Select(int.Parse).ToArray();
         }
 
+        float[] ParseFloatArrayArg(string Arg, string Context)
+        {
+            if (string.IsNullOrEmpty(Arg))
+                return Array.Empty<float>();
+
+            // Strip brackets
+            if (Arg[0] == '[' || Arg[0] == '{')
+            {
+                // Check for end bracket
+                if (Arg[0] == '[' && Arg[Arg.Length - 1] != ']'
+                    || Arg[0] == '{' && Arg[Arg.Length - 1] != '}')
+                    throw new InvalidDataException($"Error parsing ({Context}): array argument has mismatched brackets");
+
+                Arg = Arg.Substring(1, Arg.Length - 2);
+            }
+
+            string[] Frames = Arg.Split(',', ';');
+            return Frames.Select(Frame => string.IsNullOrEmpty(Frame) ? "-1" : Frame).Select(float.Parse).ToArray();
+        }
+
         bool ParseBool(string Value, string Context)
         {
             if (string.IsNullOrEmpty(Value))
@@ -1011,15 +1031,19 @@ namespace DaggerfallBestiaryProject
 
                         if(GlowColorIndex.HasValue && !string.IsNullOrEmpty(tokens[GlowColorIndex.Value]))
                         {
-                            if(ColorUtility.TryParseHtmlString(tokens[GlowColorIndex.Value], out Color parsedColor))
+                            float[] components = ParseFloatArrayArg(tokens[GlowColorIndex.Value], $"line={lineNumber},column={GlowColorIndex}");
+                            if(components.Length < 3)
                             {
-                                mobile.GlowColor = parsedColor;
-                                mobile.NoShadow = true;
+                                Debug.LogError($"Monster '{mobileID}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
                             }
                             else
                             {
-                                Debug.LogError($"Monster '{mobileID}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
-                            }                            
+                                Color glowColor = new Color(components[0], components[1], components[2]);
+                                if (components.Length >= 4)
+                                    glowColor.a = components[3];
+
+                                mobile.GlowColor = glowColor;
+                            }                
                         }
 
                         // Classic replacement stops here
