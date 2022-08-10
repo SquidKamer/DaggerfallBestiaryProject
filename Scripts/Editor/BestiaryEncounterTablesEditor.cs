@@ -189,14 +189,14 @@ namespace DaggerfallBestiaryProject
                         {
                             enemyName = null;
                         }
-                        else if (Enum.IsDefined(typeof(MobileTypes), enemyId))
-                        {
-                            enemyName = ((MobileTypes)enemyId).ToString();
-                        }
-                        else if (customEnemyDb.TryGetValue(enemyId, out CustomEnemy enemy))
+                        else if (customEnemyDb.TryGetValue(enemyId, out CustomEnemy enemy) && !string.IsNullOrEmpty(enemy.Name))
                         {
                             enemyName = enemy.Name;
                         }
+                        else if (Enum.IsDefined(typeof(MobileTypes), enemyId))
+                        {
+                            enemyName = ((MobileTypes)enemyId).ToString();
+                        }                        
                         else
                         {
                             enemyName = $"Unknown id '{enemyId}'";
@@ -219,13 +219,13 @@ namespace DaggerfallBestiaryProject
                             continue;
 
                         int enemyLevel;
-                        if (Enum.IsDefined(typeof(MobileTypes), enemyId))
-                        {
-                            enemyLevel = EnemyBasics.Enemies.First(m => m.ID == enemyId).Level;
-                        }
-                        else if (customEnemyDb.TryGetValue(enemyId, out CustomEnemy enemy))
+                        if (customEnemyDb.TryGetValue(enemyId, out CustomEnemy enemy) && enemy.Level != 0)
                         {
                             enemyLevel = enemy.Level;
+                        }
+                        else if (Enum.IsDefined(typeof(MobileTypes), enemyId))
+                        {
+                            enemyLevel = EnemyBasics.Enemies.First(m => m.ID == enemyId).Level;
                         }
                         else
                         {
@@ -295,12 +295,15 @@ namespace DaggerfallBestiaryProject
                     GUI.Label(new Rect(baseX + 112, baseY + 4, 84, 16), "Use count:");
 
                     availableHeight = position.height - baseY - 24;
-                    scroll2Pos = GUI.BeginScrollView(new Rect(baseX + 4, baseY + 24, 200, availableHeight - 4), scroll2Pos, new Rect(0, 0, 180, customEnemyDb.Keys.Count * 24), false, true);
+
+                    var customEnemies = customEnemyDb.Where(enemyPair => !Enum.IsDefined(typeof(MobileTypes), enemyPair.Key));
+
+                    scroll2Pos = GUI.BeginScrollView(new Rect(baseX + 4, baseY + 24, 200, availableHeight - 4), scroll2Pos, new Rect(0, 0, 180, customEnemies.Count() * 24), false, true);
 
                     try
                     {
                         int i = 0;
-                        foreach (var enemyPair in customEnemyDb)
+                        foreach (var enemyPair in customEnemies)
                         {
                             CustomEnemy enemy = enemyPair.Value;
 
@@ -408,6 +411,8 @@ namespace DaggerfallBestiaryProject
 
         void LoadCustomEnemies()
         {
+            customEnemyDb = new Dictionary<int, CustomEnemy>();
+
             foreach (TextAsset asset in BestiaryModManager.FindAssets<TextAsset>(workingMod, "*.mdb.csv"))
             {
                 var stream = new StreamReader(new MemoryStream(asset.bytes));
@@ -454,7 +459,7 @@ namespace DaggerfallBestiaryProject
                 }
 
                 if (!GetIndex("ID", out int IdIndex)) continue;
-                if (!GetIndex("Name", out int NameIndex)) continue;
+                int? NameIndex = GetIndexOpt("Name");
                 int? LevelIndex = GetIndexOpt("Level");
                 int? TeamIndex = GetIndexOpt("Team");
 
@@ -475,8 +480,12 @@ namespace DaggerfallBestiaryProject
                         int mobileID = int.Parse(tokens[IdIndex]);
 
                         enemy.Id = mobileID;
-                        enemy.Name = tokens[NameIndex];
 
+                        if (NameIndex.HasValue && !string.IsNullOrEmpty(tokens[NameIndex.Value]))
+                        {
+                            enemy.Name = tokens[NameIndex.Value];
+                        }
+                        
                         if(TeamIndex.HasValue && !string.IsNullOrEmpty(tokens[TeamIndex.Value]))
                         {
                             enemy.Team = (MobileTeams)Enum.Parse(typeof(MobileTeams), tokens[TeamIndex.Value]);
