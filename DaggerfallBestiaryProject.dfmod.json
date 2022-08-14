@@ -5807,6 +5807,8 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/OBLIVION - Wil-O-Wisp/1610_12-9_Emission.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/OBLIVION - Wil-O-Wisp/1610_17-2_Emission.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/OBLIVION - Wil-O-Wisp/1610_9-8_Emission.png",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/OBLIVION - Wil-O-Wisp/1610_6-4_Emission.png"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/OBLIVION - Wil-O-Wisp/1610_6-4_Emission.png",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiarySaveInterface.cs",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/BestiaryTrollCorpseSerializer.cs"
     ]
 }

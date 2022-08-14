@@ -2,26 +2,33 @@ using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Utility;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DaggerfallBestiaryProject
 {
+    public struct BestiaryTrollProperties
+    {
+        public int MobileID;
+        public float BillboardHeight;
+    }
+
     public class BestiaryTrollCorpseEntity : DaggerfallEntity
     {
-        int enemyID = 0;
+        BestiaryTrollProperties enemyProperties;
 
         public float RespawnTime = 5.0f;
-        public float BillboardHeight = 1.0f;
+        public float CorpseBillboardHeight = 1.0f;
+        public float RespawnBuffer { get { return respawnBuffer; } }
+        public BestiaryTrollProperties EnemyProperties { get { return enemyProperties; } }
+
 
         float respawnBuffer;
         bool entityStarted = false;
 
-        public BestiaryTrollCorpseEntity(DaggerfallEntityBehaviour entityBehaviour, int mobileID)
+        public BestiaryTrollCorpseEntity(DaggerfallEntityBehaviour entityBehaviour, BestiaryTrollProperties trollProperties)
             : base(entityBehaviour)
         {
-            enemyID = mobileID;
+            enemyProperties = trollProperties;
         }
 
         public override void SetEntityDefaults()
@@ -29,7 +36,7 @@ namespace DaggerfallBestiaryProject
             MaxHealth = 1;
             CurrentHealth = 1;
 
-            if(BestiaryMod.Instance.CustomEnemies.TryGetValue(enemyID, out BestiaryMod.CustomEnemy customEnemy))
+            if(BestiaryMod.Instance.CustomEnemies.TryGetValue(enemyProperties.MobileID, out BestiaryMod.CustomEnemy customEnemy))
             {
                 if(BestiaryMod.Instance.CustomCareers.TryGetValue(customEnemy.career, out BestiaryMod.CustomCareer customCareer))
                 {
@@ -48,13 +55,13 @@ namespace DaggerfallBestiaryProject
             {
                 // Show death message
                 string deathMessage = TextManager.Instance.GetLocalizedText("thingJustDied");
-                deathMessage = deathMessage.Replace("%s", TextManager.Instance.GetLocalizedEnemyName(enemyID));
+                deathMessage = deathMessage.Replace("%s", TextManager.Instance.GetLocalizedEnemyName(enemyProperties.MobileID));
                 if (!DaggerfallUnity.Settings.DisableEnemyDeathAlert)
                     DaggerfallUI.Instance.PopupMessage(deathMessage);
 
                 // Generate corpse
                 GameObject corpse = GameObjectHelper.CreateDaggerfallBillboardGameObject(254, 47, GameObjectHelper.GetBestParent());
-                corpse.transform.position = EntityBehaviour.transform.position + new Vector3(0.0f, -BillboardHeight / 2.0f + 0.1f, 0.0f);
+                corpse.transform.position = EntityBehaviour.transform.position + new Vector3(0.0f, -CorpseBillboardHeight / 2.0f + 0.1f, 0.0f);
 
                 Object.Destroy(EntityBehaviour.transform.parent.gameObject);
             }
@@ -72,15 +79,30 @@ namespace DaggerfallBestiaryProject
             if(respawnBuffer <= 0.0f)
             {
                 var enemyParent = GameObjectHelper.GetBestParent();
+
+                string enemyName = TextManager.Instance.GetLocalizedEnemyName(enemyProperties.MobileID);
+
                 var go = GameObjectHelper.CreateEnemy(
-                    TextManager.Instance.GetLocalizedEnemyName(enemyID),
-                    (MobileTypes)enemyID,
+                    enemyName,
+                    (MobileTypes)enemyProperties.MobileID,
                     Vector3.zero,
                     MobileGender.Unspecified, enemyParent);
-                go.transform.position = EntityBehaviour.transform.position;
+
+                // Spawn at the same position, adjusting for billboard height differences
+                go.transform.position = EntityBehaviour.transform.position + new Vector3(0, enemyProperties.BillboardHeight - CorpseBillboardHeight, 0);
 
                 Object.Destroy(EntityBehaviour.transform.parent.gameObject);
+
+                DaggerfallUI.AddHUDText($"The {enemyName} has recovered from its injuries.");
             }
+        }
+
+        public void RestoreSaveData(in BestiaryTrollCorpseData_v1 data)
+        {
+            respawnBuffer = data.RespawnBuffer;
+            enemyProperties.MobileID = data.MobileID;
+            enemyProperties.BillboardHeight = data.BillboardHeight;
+            CorpseBillboardHeight = data.CorpseBillboardHeight;
         }
     }
 }

@@ -28,6 +28,7 @@ namespace DaggerfallBestiaryProject
         private static Mod mod;
 
         public static BestiaryMod Instance { get; private set; }
+        public static BestiarySaveInterface SaveInterface { get { return Instance.GetComponent<BestiarySaveInterface>(); } }
 
         public class CustomCareer
         {
@@ -96,6 +97,7 @@ namespace DaggerfallBestiaryProject
 
             var go = new GameObject(mod.Title);
             Instance = go.AddComponent<BestiaryMod>();
+            mod.SaveDataInterface = go.AddComponent<BestiarySaveInterface>();
 
             mod.IsReady = true;
         }
@@ -116,6 +118,8 @@ namespace DaggerfallBestiaryProject
             PlayerGPS.OnEnterLocationRect += PlayerGPS_OnEnterLocationRect;
             PlayerGPS.OnExitLocationRect += PlayerGPS_OnExitLocationRect;
             PlayerGPS.OnClimateIndexChanged += PlayerGPS_OnClimateIndexChanged;
+
+            EnemyDeath.OnEnemyDeath += EnemyDeath_OnEnemyDeath;
         }
 
         List<EncounterTable> GetIndexEncounterTables(int index)
@@ -1627,6 +1631,30 @@ namespace DaggerfallBestiaryProject
                     },
                 }
             });
+        }
+
+        void EnemyDeath_OnEnemyDeath(object sender, EventArgs _)
+        {
+            var enemyDeath = sender as EnemyDeath;
+            if (enemyDeath == null)
+                return;
+
+            var enemyEntityBehaviour = enemyDeath.GetComponent<DaggerfallEntityBehaviour>();
+            if (enemyEntityBehaviour == null)
+                return;
+
+            if (enemyEntityBehaviour.CorpseLootContainer == null)
+                return;
+
+            var trollCorpseBillboard = enemyEntityBehaviour.CorpseLootContainer.GetComponentInChildren<BestiaryTrollCorpseBillboard>();
+            if (trollCorpseBillboard == null)
+                return;
+
+            var trollMobile = enemyEntityBehaviour.GetComponentInChildren<MobileUnit>();
+            if (trollMobile == null)
+                return;
+
+            trollCorpseBillboard.SetEnemyProperties(enemyEntityBehaviour, trollMobile);
         }
     }
 }

@@ -3,10 +3,9 @@ using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
+using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -16,8 +15,6 @@ namespace DaggerfallBestiaryProject
     {
         public int Archive = 1618;
         public int Record = 20;
-
-        public int EnemyId = 272;
 
         public float RespawnTime = 10.0f;
 
@@ -30,28 +27,29 @@ namespace DaggerfallBestiaryProject
         Camera mainCamera = null;
         MeshRenderer meshRenderer;
 
+        public ulong LoadID { get; private set; }
+
+        bool postParentedSetup = false;
+        BestiaryTrollProperties enemyProperties = new BestiaryTrollProperties();
+
         public override void AlignToBase()
         {
             if (aligned)
                 return;
 
-            // MeshReplace.AlignToBase lowers custom billboard prefabs in dungeons for some reason
+            Vector3 offset = Vector3.zero;
+
+            // MeshReplacement.AlignToBase lowers custom billboard prefabs in dungeons for some reason
             // Just put them back up
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
             {
                 int height = ImageReader.GetImageData(TextureFile.IndexToFileName(Archive), Record, createTexture: false).height;
+                offset.y += height / 2 * MeshReader.GlobalScale;
+            }
 
-                Vector3 offset = Vector3.zero;
-                offset.y = height / 2 * MeshReader.GlobalScale;
-                transform.position += offset;
-            }
-            else
-            {
-                // Calcuate offset for correct positioning in scene
-                Vector3 offset = Vector3.zero;
-                offset.y = (summary.Size.y / 2);
-                transform.position += offset;
-            }
+            // Calculate offset for correct positioning in scene
+            offset.y += (summary.Size.y / 2);
+            transform.position += offset;
 
             aligned = true;
         }
@@ -239,6 +237,54 @@ namespace DaggerfallBestiaryProject
             summary.NameSeed = (int)position;
         }
 
+        public void SetEnemyProperties(DaggerfallEntityBehaviour enemyBehaviour, MobileUnit enemyMobile)
+        {
+            enemyProperties.MobileID = enemyMobile.Enemy.ID;
+            enemyProperties.BillboardHeight = enemyMobile.Summary.RecordSizes[0].y;
+        }
+
+        public void PostParentedSetup()
+        {
+            if (postParentedSetup)
+                return;
+
+            // This troll is no loot
+            var lootObject = transform.parent.gameObject;
+            var lootComponent = lootObject.GetComponent<DaggerfallLoot>();
+            if (lootComponent != null)
+            {
+                Destroy(lootComponent);
+
+                foreach (var collider in lootObject.GetComponents<Collider>())
+                {
+                    Destroy(collider);
+                }
+            }
+
+            var existingSerializer = GetComponentInParent<SerializableLootContainer>();
+            if (existingSerializer != null)
+            {
+                LoadID = existingSerializer.LoadID;
+                Destroy(existingSerializer);
+            }
+            else
+            {
+                LoadID = DaggerfallUnity.NextUID;
+            }
+
+            var entityBehaviour = GetComponent<DaggerfallEntityBehaviour>();
+            if (entityBehaviour)
+            {
+                var trollCorpseEntity = new BestiaryTrollCorpseEntity(entityBehaviour, enemyProperties);
+                trollCorpseEntity.RespawnTime = RespawnTime;
+                trollCorpseEntity.CorpseBillboardHeight = summary.Size.y;
+                trollCorpseEntity.SetEntityDefaults();
+                entityBehaviour.Entity = trollCorpseEntity;
+            }
+
+            postParentedSetup = true;
+        }
+
         // Start is called before the first frame update
         void Start()
         {
@@ -261,28 +307,7 @@ namespace DaggerfallBestiaryProject
                 AlignToBase();
             }
 
-            // This troll is no loot
-            var lootObject = transform.parent.gameObject;
-            var lootComponent = lootObject.GetComponent<DaggerfallLoot>();
-            if (lootComponent != null)
-            {
-                Destroy(lootComponent);
-
-                foreach (var collider in lootObject.GetComponents<Collider>())
-                {
-                    Destroy(collider);
-                }
-            }
-
-            var entityBehaviour = GetComponent<DaggerfallEntityBehaviour>();
-            if(entityBehaviour)
-            {
-                var trollCorpseEntity = new BestiaryTrollCorpseEntity(entityBehaviour, EnemyId);
-                trollCorpseEntity.RespawnTime = RespawnTime;
-                trollCorpseEntity.BillboardHeight = summary.Size.y;
-                trollCorpseEntity.SetEntityDefaults();
-                entityBehaviour.Entity = trollCorpseEntity;
-            }
+            PostParentedSetup();
         }
 
         // Update is called once per frame
