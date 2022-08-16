@@ -641,6 +641,8 @@ namespace DaggerfallBestiaryProject
                 int? FemaleTextureIndex = GetIndexOpt("FemaleTexture");
                 int? CorpseTextureArchiveIndex = GetIndexOpt("CorpseTextureArchive");
                 int? CorpseTextureRecordIndex = GetIndexOpt("CorpseTextureRecord");
+                int? FemaleCorpseTextureArchiveIndex = GetIndexOpt("FemaleCorpseTextureArchive");
+                int? FemaleCorpseTextureRecordIndex = GetIndexOpt("FemaleCorpseTextureRecord");
                 int? HasIdleIndex = GetIndexOpt("HasIdle");
                 int? CastsMagicIndex = GetIndexOpt("CastsMagic");
                 int? NoSpellAnimsIndex = GetIndexOpt("NoSpellAnims");
@@ -765,6 +767,14 @@ namespace DaggerfallBestiaryProject
                         {
                             Debug.LogError($"Monster '{mobile.ID}' did not have a CorpseTextureArchive or CorpseTextureRecord specified.");
                             continue;
+                        }
+
+                        if (FemaleCorpseTextureArchiveIndex.HasValue && !string.IsNullOrEmpty(tokens[FemaleCorpseTextureArchiveIndex.Value])
+                            && FemaleCorpseTextureRecordIndex.HasValue && !string.IsNullOrEmpty(tokens[FemaleCorpseTextureRecordIndex.Value]))
+                        {
+                            int CorpseArchive = int.Parse(tokens[FemaleCorpseTextureArchiveIndex.Value]);
+                            int CorpseRecord = int.Parse(tokens[FemaleCorpseTextureRecordIndex.Value]);
+                            mobile.FemaleCorpseTexture = EnemyBasics.CorpseTexture(CorpseArchive, CorpseRecord);
                         }
 
                         if (HasIdleIndex.HasValue && !string.IsNullOrEmpty(tokens[HasIdleIndex.Value]))
