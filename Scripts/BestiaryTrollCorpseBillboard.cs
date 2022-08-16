@@ -4,6 +4,7 @@ using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Serialization;
+using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using UnityEngine;
@@ -11,6 +12,7 @@ using UnityEngine.Rendering;
 
 namespace DaggerfallBestiaryProject
 {
+    [ImportedComponent]
     public class BestiaryTrollCorpseBillboard : Billboard
     {
         public int Archive = 1618;

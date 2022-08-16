@@ -4,6 +4,7 @@ using FullSerializer;
 using System;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Game.Utility.ModSupport;
 
 namespace DaggerfallBestiaryProject
 {
@@ -21,6 +22,7 @@ namespace DaggerfallBestiaryProject
         public float CorpseBillboardHeight;
     }
 
+    [ImportedComponent]
     public class BestiaryTrollCorpseSerializer : MonoBehaviour, ISerializableGameObject
     {
         BestiaryTrollCorpseBillboard corpseBillboard;
