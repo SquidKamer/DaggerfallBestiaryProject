@@ -46,6 +46,7 @@ namespace DaggerfallBestiaryProject
             public string spellbookTable;
             public int onHitEffect;
             public DFBlock.EnemyGenders forcedGender;
+            public bool isSkeletal;
         }
 
         private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
@@ -114,6 +115,7 @@ namespace DaggerfallBestiaryProject
 
             EnemyEntity.OnLootSpawned += OnEnemySpawn;
             FormulaHelper.RegisterOverride<Action<EnemyEntity, DaggerfallEntity, int>>(mod, "OnMonsterHit", OnMonsterHit);
+            FormulaHelper.RegisterOverride<Func<DaggerfallEntity, DaggerfallEntity, int, int, DaggerfallUnityItem, int>>(mod, "CalculateWeaponAttackDamage", CalculateWeaponAttackDamage);
             PlayerEnterExit.OnPreTransition += PlayerEnterExit_OnPreTransition;
             PlayerGPS.OnEnterLocationRect += PlayerGPS_OnEnterLocationRect;
             PlayerGPS.OnExitLocationRect += PlayerGPS_OnExitLocationRect;
@@ -721,9 +723,18 @@ namespace DaggerfallBestiaryProject
                             mobile.Behaviour = (MobileBehaviour)Enum.Parse(typeof(MobileBehaviour), tokens[BehaviourIndex.Value], ignoreCase: true);
                         }
 
+                        bool isSkeletal = false;
                         if (AffinityIndex.HasValue && !string.IsNullOrEmpty(tokens[AffinityIndex.Value]))
                         {
-                            mobile.Affinity = (MobileAffinity)Enum.Parse(typeof(MobileAffinity), tokens[AffinityIndex.Value], ignoreCase: true);
+                            if (tokens[AffinityIndex.Value].Equals("Skeletal", StringComparison.OrdinalIgnoreCase))
+                            {
+                                isSkeletal = true;
+                                mobile.Affinity = MobileAffinity.Undead;
+                            }
+                            else
+                            {
+                                mobile.Affinity = (MobileAffinity)Enum.Parse(typeof(MobileAffinity), tokens[AffinityIndex.Value], ignoreCase: true);
+                            }
                         }
 
                         if (TeamIndex.HasValue && !string.IsNullOrEmpty(tokens[TeamIndex.Value]))
@@ -1062,6 +1073,7 @@ namespace DaggerfallBestiaryProject
 
                         // Classic replacement stops here
                         CustomEnemy customEnemy;
+                        
                         if (Enum.IsDefined(typeof(MobileTypes), mobileID))
                         {
                             enemies[enemyReplacementIndex] = mobile;
@@ -1072,7 +1084,9 @@ namespace DaggerfallBestiaryProject
                             customEnemy = new CustomEnemy();
                             customEnemy.mobileEnemy = mobile;
                         }
-                        
+
+                        customEnemy.isSkeletal = isSkeletal;
+
                         if (NameIndex.HasValue && !string.IsNullOrEmpty(tokens[NameIndex.Value]))
                         {
                             customEnemy.name = tokens[NameIndex.Value];
@@ -1383,6 +1397,52 @@ namespace DaggerfallBestiaryProject
                         break;
                 }
             }
+        }
+
+        int CalculateWeaponAttackDamage(DaggerfallEntity attacker, DaggerfallEntity target, int damageModifier, int weaponAnimTime, DaggerfallUnityItem weapon)
+        {
+            int damage = UnityEngine.Random.Range(weapon.GetBaseDamageMin(), weapon.GetBaseDamageMax() + 1) + damageModifier;
+
+            if (target != GameManager.Instance.PlayerEntity)
+            {
+                var targetEnemy = (EnemyEntity)target;
+                bool isSkeletal = targetEnemy.MobileEnemy.ID == (int)MonsterCareers.SkeletalWarrior;
+                if(!isSkeletal)
+                {
+                    if(customEnemies.TryGetValue(targetEnemy.MobileEnemy.ID, out CustomEnemy customEnemy))
+                    {
+                        isSkeletal = customEnemy.isSkeletal;
+                    }
+                }
+
+                if (isSkeletal)
+                {
+                    // Apply edged-weapon damage modifier for Skeletal Warrior
+                    if ((weapon.flags & 0x10) == 0)
+                        damage /= 2;
+
+                    // Apply silver weapon damage modifier for Skeletal Warrior
+                    // Arena applies a silver weapon damage bonus for undead enemies, which is probably where this comes from.
+                    if (weapon.NativeMaterialValue == (int)WeaponMaterialTypes.Silver)
+                        damage *= 2;
+                }
+            }
+
+            // Apply strength modifier
+            damage += FormulaHelper.DamageModifier(attacker.Stats.LiveStrength);
+
+            // Apply material modifier.
+            // The in-game display in Daggerfall of weapon damages with material modifiers is incorrect. The material modifier is half of what the display suggests.
+            damage += weapon.GetWeaponMaterialModifier();
+            if (damage < 1)
+                damage = 0;
+
+            damage += FormulaHelper.GetBonusOrPenaltyByEnemyType(attacker, target);
+
+            // Mod hook for adjusting final weapon damage. (no-op in DFU)
+            damage = FormulaHelper.AdjustWeaponAttackDamage(attacker, target, damage, weaponAnimTime, weapon);
+
+            return damage;
         }
 
         void ParseEncounterTables()
