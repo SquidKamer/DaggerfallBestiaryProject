@@ -1,8 +1,8 @@
 {
     "ModTitle": "Daggerfall Enemy Expansion",
-    "ModVersion": "0.1",
+    "ModVersion": "0.2",
     "ModAuthor": "Kamer & Kab",
-    "DFUnity_Version": "0.14.4",
+    "DFUnity_Version": "0.14.5",
     "GUID": "76557441-7025-402e-a145-e3e1a28a093d",
     "Files": [
         "Assets/Game/Mods/DaggerfallBestiaryProject/CareerBase.cdb.csv",
