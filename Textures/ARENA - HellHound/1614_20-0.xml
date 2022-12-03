@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <info>
+	<emission>True</emission>
 	<scaleX>1.05</scaleX>
 	<scaleY>1.05</scaleY>
 </info>
