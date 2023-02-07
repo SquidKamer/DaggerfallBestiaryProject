@@ -43,6 +43,8 @@ namespace DaggerfallBestiaryProject
             public MobileEnemy mobileEnemy;
             public string name;
             public string career;
+            public DFCareer.EnemyGroups group = DFCareer.EnemyGroups.None;
+            public DFCareer.Skills language = DFCareer.Skills.None;
             public string spellbookTable;
             public int onHitEffect;
             public DFBlock.EnemyGenders forcedGender;
@@ -116,6 +118,8 @@ namespace DaggerfallBestiaryProject
             EnemyEntity.OnLootSpawned += OnEnemySpawn;
             FormulaHelper.RegisterOverride<Action<EnemyEntity, DaggerfallEntity, int>>(mod, "OnMonsterHit", OnMonsterHit);
             FormulaHelper.RegisterOverride<Func<DaggerfallEntity, DaggerfallEntity, int, int, DaggerfallUnityItem, int>>(mod, "CalculateWeaponAttackDamage", CalculateWeaponAttackDamage);
+            FormulaHelper.RegisterOverride<Func<EnemyEntity, DFCareer.EnemyGroups>>(mod, "GetEnemyEntityEnemyGroup", GetEnemyGroup);
+            FormulaHelper.RegisterOverride<Func<EnemyEntity, DFCareer.Skills>>(mod, "GetEnemyEntityLanguageSkill", GetEnemyLanguage);
             PlayerEnterExit.OnPreTransition += PlayerEnterExit_OnPreTransition;
             PlayerGPS.OnEnterLocationRect += PlayerGPS_OnEnterLocationRect;
             PlayerGPS.OnExitLocationRect += PlayerGPS_OnExitLocationRect;
@@ -654,6 +658,8 @@ namespace DaggerfallBestiaryProject
                 int? LevelIndex = GetIndexOpt("Level");
                 int? BehaviourIndex = GetIndexOpt("Behaviour");
                 int? AffinityIndex = GetIndexOpt("Affinity");
+                int? GroupIndex = GetIndexOpt("Group");
+                int? LanguageIndex = GetIndexOpt("Language");
                 int? MinDamageIndex = GetIndexOpt("MinDamage");
                 int? MaxDamageIndex = GetIndexOpt("MaxDamage");
                 int? MinDamage2Index = GetIndexOpt("MinDamage2");
@@ -1107,7 +1113,17 @@ namespace DaggerfallBestiaryProject
                             continue;
                         }
 
-                        if(SpellBookIndex.HasValue && !string.IsNullOrEmpty(tokens[SpellBookIndex.Value]))
+                        if (GroupIndex.HasValue && !string.IsNullOrEmpty(tokens[GroupIndex.Value]))
+                        {
+                            customEnemy.group = (DFCareer.EnemyGroups)Enum.Parse(typeof(DFCareer.EnemyGroups), tokens[GroupIndex.Value]); 
+                        }
+
+                        if (LanguageIndex.HasValue && !string.IsNullOrEmpty(tokens[LanguageIndex.Value]))
+                        {
+                            customEnemy.language = (DFCareer.Skills)Enum.Parse(typeof(DFCareer.Skills), tokens[LanguageIndex.Value]);
+                        }
+
+                        if (SpellBookIndex.HasValue && !string.IsNullOrEmpty(tokens[SpellBookIndex.Value]))
                         {
                             string spellBookToken = tokens[SpellBookIndex.Value];
 
@@ -1725,6 +1741,147 @@ namespace DaggerfallBestiaryProject
                 return;
 
             trollCorpseBillboard.SetEnemyProperties(enemyEntityBehaviour, trollMobile);
+        }
+
+        DFCareer.EnemyGroups GetEnemyGroup(EnemyEntity e)
+        {
+            if (customEnemies.TryGetValue(e.MobileEnemy.ID, out CustomEnemy customEnemy))
+            {
+                return customEnemy.group;
+            }
+            else
+            {
+                switch (e.CareerIndex)
+                {
+                    case (int)MonsterCareers.Rat:
+                    case (int)MonsterCareers.GiantBat:
+                    case (int)MonsterCareers.GrizzlyBear:
+                    case (int)MonsterCareers.SabertoothTiger:
+                    case (int)MonsterCareers.Spider:
+                    case (int)MonsterCareers.Slaughterfish:
+                    case (int)MonsterCareers.GiantScorpion:
+                    case (int)MonsterCareers.Dragonling:
+                    case (int)MonsterCareers.Horse_Invalid:             // (grouped as undead in classic)
+                    case (int)MonsterCareers.Dragonling_Alternate:      // (grouped as undead in classic)
+                        return DFCareer.EnemyGroups.Animals;
+                    case (int)MonsterCareers.Imp:
+                    case (int)MonsterCareers.Spriggan:
+                    case (int)MonsterCareers.Orc:
+                    case (int)MonsterCareers.Centaur:
+                    case (int)MonsterCareers.Werewolf:
+                    case (int)MonsterCareers.Nymph:
+                    case (int)MonsterCareers.OrcSergeant:
+                    case (int)MonsterCareers.Harpy:
+                    case (int)MonsterCareers.Wereboar:
+                    case (int)MonsterCareers.Giant:
+                    case (int)MonsterCareers.OrcShaman:
+                    case (int)MonsterCareers.Gargoyle:
+                    case (int)MonsterCareers.OrcWarlord:
+                    case (int)MonsterCareers.Dreugh:                    // (grouped as undead in classic)
+                    case (int)MonsterCareers.Lamia:                     // (grouped as undead in classic)
+                        return DFCareer.EnemyGroups.Humanoid;
+                    case (int)MonsterCareers.SkeletalWarrior:
+                    case (int)MonsterCareers.Zombie:                    // (grouped as animal in classic)
+                    case (int)MonsterCareers.Ghost:
+                    case (int)MonsterCareers.Mummy:
+                    case (int)MonsterCareers.Wraith:
+                    case (int)MonsterCareers.Vampire:
+                    case (int)MonsterCareers.VampireAncient:
+                    case (int)MonsterCareers.Lich:
+                    case (int)MonsterCareers.AncientLich:
+                        return DFCareer.EnemyGroups.Undead;
+                    case (int)MonsterCareers.FrostDaedra:
+                    case (int)MonsterCareers.FireDaedra:
+                    case (int)MonsterCareers.Daedroth:
+                    case (int)MonsterCareers.DaedraSeducer:
+                    case (int)MonsterCareers.DaedraLord:
+                        return DFCareer.EnemyGroups.Daedra;
+                    case (int)MonsterCareers.FireAtronach:
+                    case (int)MonsterCareers.IronAtronach:
+                    case (int)MonsterCareers.FleshAtronach:
+                    case (int)MonsterCareers.IceAtronach:
+                        return DFCareer.EnemyGroups.None;
+
+                    default:
+                        return DFCareer.EnemyGroups.None;
+                }
+            }
+        }
+
+        DFCareer.Skills GetEnemyLanguage(EnemyEntity e)
+        {
+            if (customEnemies.TryGetValue(e.MobileEnemy.ID, out CustomEnemy customEnemy))
+            {
+                return customEnemy.language;
+            }
+            else
+            {
+                if (e.EntityType == EntityTypes.EnemyClass)
+                {
+                    switch (e.CareerIndex)
+                    {   // BCHG: classic uses Ettiquette for all
+                        case (int)ClassCareers.Burglar:
+                        case (int)ClassCareers.Rogue:
+                        case (int)ClassCareers.Acrobat:
+                        case (int)ClassCareers.Thief:
+                        case (int)ClassCareers.Assassin:
+                        case (int)ClassCareers.Nightblade:
+                            return DFCareer.Skills.Streetwise;
+                        default:
+                            return DFCareer.Skills.Etiquette;
+                    }
+                }
+
+                switch (e.CareerIndex)
+                {
+                    case (int)MonsterCareers.Orc:
+                    case (int)MonsterCareers.OrcSergeant:
+                    case (int)MonsterCareers.OrcShaman:
+                    case (int)MonsterCareers.OrcWarlord:
+                        return DFCareer.Skills.Orcish;
+
+                    case (int)MonsterCareers.Harpy:
+                        return DFCareer.Skills.Harpy;
+
+                    case (int)MonsterCareers.Giant:
+                    case (int)MonsterCareers.Gargoyle:
+                        return DFCareer.Skills.Giantish;
+
+                    case (int)MonsterCareers.Dragonling:
+                    case (int)MonsterCareers.Dragonling_Alternate:
+                        return DFCareer.Skills.Dragonish;
+
+                    case (int)MonsterCareers.Nymph:
+                    case (int)MonsterCareers.Lamia:
+                        return DFCareer.Skills.Nymph;
+
+                    case (int)MonsterCareers.FrostDaedra:
+                    case (int)MonsterCareers.FireDaedra:
+                    case (int)MonsterCareers.Daedroth:
+                    case (int)MonsterCareers.DaedraSeducer:
+                    case (int)MonsterCareers.DaedraLord:
+                        return DFCareer.Skills.Daedric;
+
+                    case (int)MonsterCareers.Spriggan:
+                        return DFCareer.Skills.Spriggan;
+
+                    case (int)MonsterCareers.Centaur:
+                        return DFCareer.Skills.Centaurian;
+
+                    case (int)MonsterCareers.Imp:
+                    case (int)MonsterCareers.Dreugh:
+                        return DFCareer.Skills.Impish;
+
+                    case (int)MonsterCareers.Vampire:
+                    case (int)MonsterCareers.VampireAncient:
+                    case (int)MonsterCareers.Lich:
+                    case (int)MonsterCareers.AncientLich:
+                        return DFCareer.Skills.Etiquette;
+
+                    default:
+                        return DFCareer.Skills.None;
+                }
+            }
         }
     }
 }
