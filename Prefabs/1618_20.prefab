@@ -121,7 +121,6 @@ MonoBehaviour:
     CastleBlock: 0
   Archive: 1618
   Record: 20
-  EnemyId: 272
   RespawnTime: 10
 --- !u!114 &-8684248689144864929
 MonoBehaviour:
@@ -165,7 +164,7 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 1
-  m_Center: {x: 0, y: -2.7, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &-3341238389159315469
 MonoBehaviour:
   m_ObjectHideFlags: 0
