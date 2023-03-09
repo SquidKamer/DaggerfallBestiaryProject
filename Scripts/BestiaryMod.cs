@@ -38,7 +38,7 @@ namespace DaggerfallBestiaryProject
         private Dictionary<string, CustomCareer> customCareers = new Dictionary<string, CustomCareer>(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, CustomCareer> CustomCareers { get { return customCareers; } }
 
-        public class CustomEnemy
+        public class CustomEnemyProperties
         {
             public MobileEnemy mobileEnemy;
             public string name;
@@ -48,12 +48,20 @@ namespace DaggerfallBestiaryProject
             public string spellbookTable;
             public int onHitEffect;
             public DFBlock.EnemyGenders forcedGender;
+            public bool isTransparent;
             public bool isSkeletal;
         }
 
-        private Dictionary<int, CustomEnemy> customEnemies = new Dictionary<int, CustomEnemy>();
+        private Dictionary<int, CustomEnemyProperties> customEnemies = new Dictionary<int, CustomEnemyProperties>();
 
-        public Dictionary<int, CustomEnemy> CustomEnemies { get { return customEnemies; } }
+        public Dictionary<int, CustomEnemyProperties> CustomEnemies { get { return customEnemies; } }
+
+        private Dictionary<int, CustomEnemyProperties> classicEnemies = new Dictionary<int, CustomEnemyProperties>();
+
+        bool GetCustomEnemyProperties(int mobileID, out CustomEnemyProperties customEnemyProperties)
+        {
+            return classicEnemies.TryGetValue(mobileID, out customEnemyProperties) || customEnemies.TryGetValue(mobileID, out customEnemyProperties);
+        }
 
         public class EncounterTable
         {
@@ -693,6 +701,7 @@ namespace DaggerfallBestiaryProject
                 int? NoShadowIndex = GetIndexOpt("NoShadow");
                 int? ForcedGenderIndex = GetIndexOpt("ForcedGender");
                 int? GlowColorIndex = GetIndexOpt("GlowColor");
+                int? TransparentIndex = GetIndexOpt("Transparent");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -710,9 +719,10 @@ namespace DaggerfallBestiaryProject
                                                 
                         MobileEnemy mobile;
 
+                        bool classicReplacement = Enum.IsDefined(typeof(MobileTypes), mobileID);
                         bool enemyReplacement = false;
                         int enemyReplacementIndex = -1;
-                        if (Enum.IsDefined(typeof(MobileTypes), mobileID) || customEnemies.ContainsKey(mobileID))
+                        if (classicReplacement || customEnemies.ContainsKey(mobileID))
                         {
                             enemyReplacementIndex = enemies.FindIndex(m => m.ID == mobileID);
                             mobile = enemies[enemyReplacementIndex];
@@ -1078,24 +1088,29 @@ namespace DaggerfallBestiaryProject
                         }
 
                         // Classic replacement stops here
-                        CustomEnemy customEnemy;
-                        
+                        CustomEnemyProperties customEnemyProperties;
+
                         if (Enum.IsDefined(typeof(MobileTypes), mobileID))
                         {
                             enemies[enemyReplacementIndex] = mobile;
-                            continue;
+                            if (!classicEnemies.TryGetValue(mobileID, out customEnemyProperties))
+                            {
+                                customEnemyProperties = new CustomEnemyProperties();
+                                customEnemyProperties.mobileEnemy = mobile;
+                                classicEnemies.Add(mobileID, customEnemyProperties);
+                            }
                         }
-                        else if(!customEnemies.TryGetValue(mobileID, out customEnemy))
-                        {                            
-                            customEnemy = new CustomEnemy();
-                            customEnemy.mobileEnemy = mobile;
+                        else if(!customEnemies.TryGetValue(mobileID, out customEnemyProperties))
+                        {
+                            customEnemyProperties = new CustomEnemyProperties();
+                            customEnemyProperties.mobileEnemy = mobile;
                         }
 
-                        customEnemy.isSkeletal = isSkeletal;
+                        customEnemyProperties.isSkeletal = isSkeletal;
 
                         if (NameIndex.HasValue && !string.IsNullOrEmpty(tokens[NameIndex.Value]))
                         {
-                            customEnemy.name = tokens[NameIndex.Value];
+                            customEnemyProperties.name = tokens[NameIndex.Value];
                         }
                         else if(!enemyReplacement)
                         {
@@ -1105,7 +1120,7 @@ namespace DaggerfallBestiaryProject
 
                         if (CareerIndex.HasValue && !string.IsNullOrEmpty(tokens[CareerIndex.Value]))
                         {
-                            customEnemy.career = tokens[CareerIndex.Value];
+                            customEnemyProperties.career = tokens[CareerIndex.Value];
                         }
                         else if(!enemyReplacement)
                         {
@@ -1115,12 +1130,12 @@ namespace DaggerfallBestiaryProject
 
                         if (GroupIndex.HasValue && !string.IsNullOrEmpty(tokens[GroupIndex.Value]))
                         {
-                            customEnemy.group = (DFCareer.EnemyGroups)Enum.Parse(typeof(DFCareer.EnemyGroups), tokens[GroupIndex.Value]); 
+                            customEnemyProperties.group = (DFCareer.EnemyGroups)Enum.Parse(typeof(DFCareer.EnemyGroups), tokens[GroupIndex.Value]); 
                         }
 
                         if (LanguageIndex.HasValue && !string.IsNullOrEmpty(tokens[LanguageIndex.Value]))
                         {
-                            customEnemy.language = (DFCareer.Skills)Enum.Parse(typeof(DFCareer.Skills), tokens[LanguageIndex.Value]);
+                            customEnemyProperties.language = (DFCareer.Skills)Enum.Parse(typeof(DFCareer.Skills), tokens[LanguageIndex.Value]);
                         }
 
                         if (SpellBookIndex.HasValue && !string.IsNullOrEmpty(tokens[SpellBookIndex.Value]))
@@ -1140,43 +1155,48 @@ namespace DaggerfallBestiaryProject
                                 string rawSpellbookName = mobile.ID.ToString();
                                 spellbookTables.Add(rawSpellbookName, spellbookTable);
 
-                                customEnemy.spellbookTable = rawSpellbookName;
+                                customEnemyProperties.spellbookTable = rawSpellbookName;
                             }
                             // Try as fixed spellbook type
                             else
                             {
-                                customEnemy.spellbookTable = spellBookToken;
+                                customEnemyProperties.spellbookTable = spellBookToken;
                             }
                         }
 
                         if(OnHitIndex.HasValue && !string.IsNullOrEmpty(tokens[OnHitIndex.Value]))
                         {
-                            customEnemy.onHitEffect = int.Parse(tokens[OnHitIndex.Value]);
+                            customEnemyProperties.onHitEffect = int.Parse(tokens[OnHitIndex.Value]);
                         }
 
                         if(ForcedGenderIndex.HasValue && !string.IsNullOrEmpty(tokens[ForcedGenderIndex.Value]))
                         {
-                            customEnemy.forcedGender = (DFBlock.EnemyGenders)Enum.Parse(typeof(DFBlock.EnemyGenders), tokens[ForcedGenderIndex.Value]);
+                            customEnemyProperties.forcedGender = (DFBlock.EnemyGenders)Enum.Parse(typeof(DFBlock.EnemyGenders), tokens[ForcedGenderIndex.Value]);
                         }
 
-                        if(!customCareers.TryGetValue(customEnemy.career, out CustomCareer customCareer))
+                        if(TransparentIndex.HasValue && !string.IsNullOrEmpty(tokens[TransparentIndex.Value]))
                         {
-                            Debug.LogError($"Monster '{mobile.ID}' has unknown career '{customEnemy.career}'");
-                            continue;
+                            customEnemyProperties.isTransparent = ParseBool(tokens[TransparentIndex.Value], $"line={lineNumber}, column={TransparentIndex.Value + 1}");
                         }
 
                         if (!enemyReplacement)
                         {
-                            customEnemies.Add(mobile.ID, customEnemy);
-                            enemies.Add(mobile);
-                        }
-                                                
-                        DaggerfallEntity.RegisterCustomCareerTemplate(mobile.ID, customCareer.dfCareer);
+                            if (!customCareers.TryGetValue(customEnemyProperties.career, out CustomCareer customCareer))
+                            {
+                                Debug.LogError($"Monster '{mobile.ID}' has unknown career '{customEnemyProperties.career}'");
+                                continue;
+                            }
 
-                        string questName = customEnemy.name.Replace(' ', '_');
-                        if (!QuestMachine.Instance.FoesTable.HasValue(questName))
-                        {
-                            questEnemyLines.Add($"{mobile.ID}, {questName}");
+                            customEnemies.Add(mobile.ID, customEnemyProperties);
+                            enemies.Add(mobile);
+
+                            DaggerfallEntity.RegisterCustomCareerTemplate(mobile.ID, customCareer.dfCareer);
+
+                            string questName = customEnemyProperties.name.Replace(' ', '_');
+                            if (!QuestMachine.Instance.FoesTable.HasValue(questName))
+                            {
+                                questEnemyLines.Add($"{mobile.ID}, {questName}");
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -1196,16 +1216,18 @@ namespace DaggerfallBestiaryProject
             if (enemyEntity == null)
                 return;
 
-            if (!customEnemies.TryGetValue(args.MobileEnemy.ID, out CustomEnemy customEnemy))
+            if (!GetCustomEnemyProperties(args.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
                 return;
 
-            if (!string.IsNullOrEmpty(customEnemy.spellbookTable))
+            // Spellbook
+            if (!string.IsNullOrEmpty(customEnemyProperties.spellbookTable))
             {
-                SetEnemySpells(enemyEntity, customEnemy);
+                SetEnemySpells(enemyEntity, customEnemyProperties);
             }
 
+            // Forced gender
             // Sometimes we only have archives for one gender. Force the entity gender so we get the correct groans
-            if(customEnemy.forcedGender != DFBlock.EnemyGenders.Unspecified)
+            if (customEnemyProperties.forcedGender != DFBlock.EnemyGenders.Unspecified)
             {
                 // Using reflection, yes
                 MobileUnit enemyMobileUnit = enemyEntity.EntityBehaviour.GetComponentInChildren<MobileUnit>();
@@ -1217,7 +1239,7 @@ namespace DaggerfallBestiaryProject
                     {
                         var enemySummary = (MobileUnit.MobileUnitSummary)enemySummaryField.GetValue(enemyMobileUnit);
 
-                        if (customEnemy.forcedGender == DFBlock.EnemyGenders.Male)
+                        if (customEnemyProperties.forcedGender == DFBlock.EnemyGenders.Male)
                         {
                             enemyEntity.Gender = Genders.Male;
                             enemySummary.Enemy.Gender = MobileGender.Male;
@@ -1232,9 +1254,20 @@ namespace DaggerfallBestiaryProject
                     }
                 }
             }
+
+            // Transparent
+            if(customEnemyProperties.isTransparent && customEnemyProperties.mobileEnemy.Behaviour != MobileBehaviour.Spectral)
+            {                
+                MeshRenderer meshRenderer = enemyEntity.EntityBehaviour.GetComponentInChildren<MeshRenderer>();
+                if (meshRenderer != null)
+                {
+                    meshRenderer.material.shader = Shader.Find(MaterialReader._DaggerfallGhostShaderName);
+                    meshRenderer.material.SetFloat("_Cutoff", 0.1f);
+                }
+            }
         }
 
-        void SetEnemySpells(EnemyEntity enemyEntity, in CustomEnemy customEnemy)
+        void SetEnemySpells(EnemyEntity enemyEntity, CustomEnemyProperties customEnemy)
         {
             if(!spellbookTables.TryGetValue(customEnemy.spellbookTable, out SpellbookTable spellbookTable))
             {
@@ -1300,9 +1333,9 @@ namespace DaggerfallBestiaryProject
             };
 
             int customEffect = 0;
-            if(customEnemies.TryGetValue(attacker.MobileEnemy.ID, out CustomEnemy customEnemy))
+            if(GetCustomEnemyProperties(attacker.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
             {
-                customEffect = customEnemy.onHitEffect;
+                customEffect = customEnemyProperties.onHitEffect;
             }
 
             float random;
@@ -1425,7 +1458,7 @@ namespace DaggerfallBestiaryProject
                 bool isSkeletal = targetEnemy.MobileEnemy.ID == (int)MonsterCareers.SkeletalWarrior;
                 if(!isSkeletal)
                 {
-                    if(customEnemies.TryGetValue(targetEnemy.MobileEnemy.ID, out CustomEnemy customEnemy))
+                    if(GetCustomEnemyProperties(targetEnemy.MobileEnemy.ID, out CustomEnemyProperties customEnemy))
                     {
                         isSkeletal = customEnemy.isSkeletal;
                     }
@@ -1745,7 +1778,7 @@ namespace DaggerfallBestiaryProject
 
         DFCareer.EnemyGroups GetEnemyGroup(EnemyEntity e)
         {
-            if (customEnemies.TryGetValue(e.MobileEnemy.ID, out CustomEnemy customEnemy))
+            if (customEnemies.TryGetValue(e.MobileEnemy.ID, out CustomEnemyProperties customEnemy))
             {
                 return customEnemy.group;
             }
@@ -1810,7 +1843,7 @@ namespace DaggerfallBestiaryProject
 
         DFCareer.Skills GetEnemyLanguage(EnemyEntity e)
         {
-            if (customEnemies.TryGetValue(e.MobileEnemy.ID, out CustomEnemy customEnemy))
+            if (customEnemies.TryGetValue(e.MobileEnemy.ID, out CustomEnemyProperties customEnemy))
             {
                 return customEnemy.language;
             }

@@ -36,7 +36,7 @@ namespace DaggerfallBestiaryProject
             MaxHealth = 1;
             CurrentHealth = 1;
 
-            if(BestiaryMod.Instance.CustomEnemies.TryGetValue(enemyProperties.MobileID, out BestiaryMod.CustomEnemy customEnemy))
+            if(BestiaryMod.Instance.CustomEnemies.TryGetValue(enemyProperties.MobileID, out BestiaryMod.CustomEnemyProperties customEnemy))
             {
                 if(BestiaryMod.Instance.CustomCareers.TryGetValue(customEnemy.career, out BestiaryMod.CustomCareer customCareer))
                 {
