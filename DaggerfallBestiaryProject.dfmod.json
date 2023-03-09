@@ -1,6 +1,6 @@
 {
     "ModTitle": "Daggerfall Enemy Expansion",
-    "ModVersion": "1.2.2",
+    "ModVersion": "1.2.3",
     "ModAuthor": "Kamer & Kab",
     "DFUnity_Version": "0.14.5",
     "GUID": "76557441-7025-402e-a145-e3e1a28a093d",
@@ -6270,6 +6270,7 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Wraith/1622_7-0.xml",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Wraith/1622_8-0.xml",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Wraith/1622_6-0.xml",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Wraith/1622_10-0.xml"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/ARENA - Wraith/1622_10-0.xml",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/ClassicClassBase.mdb.csv"
     ]
 }
