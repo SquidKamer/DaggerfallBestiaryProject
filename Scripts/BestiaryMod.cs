@@ -1087,12 +1087,16 @@ namespace DaggerfallBestiaryProject
                             }                
                         }
 
-                        // Classic replacement stops here
+                        // Classic properties replacement stops here
+                        if(enemyReplacement)
+                        {
+                            enemies[enemyReplacementIndex] = mobile;
+                        }
+
                         CustomEnemyProperties customEnemyProperties;
 
                         if (Enum.IsDefined(typeof(MobileTypes), mobileID))
                         {
-                            enemies[enemyReplacementIndex] = mobile;
                             if (!classicEnemies.TryGetValue(mobileID, out customEnemyProperties))
                             {
                                 customEnemyProperties = new CustomEnemyProperties();
