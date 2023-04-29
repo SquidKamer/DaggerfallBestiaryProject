@@ -2583,7 +2583,7 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_2-5.PNG",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_2-6.PNG",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_2-7.PNG",
-		"Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_20-0.PNG",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_20-0.PNG",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_3-0.PNG",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_3-0.xml",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/DAGGER - HorseRiders/1500/1500_3-1.PNG",
@@ -7425,6 +7425,7 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_1-1.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_5-11.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_7-16.png",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_5-8.png"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_5-8.png",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/modsettings.json"
     ]
 }

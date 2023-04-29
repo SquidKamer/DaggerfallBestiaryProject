@@ -20,12 +20,15 @@ using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using DaggerfallConnect.Save;
 using DaggerfallConnect.Arena2;
+using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 
 namespace DaggerfallBestiaryProject
 {
     public class BestiaryMod : MonoBehaviour
     {
         private static Mod mod;
+
+        private static bool disableSpiders = false;
 
         public static BestiaryMod Instance { get; private set; }
         public static BestiarySaveInterface SaveInterface { get { return Instance.GetComponent<BestiarySaveInterface>(); } }
@@ -50,6 +53,7 @@ namespace DaggerfallBestiaryProject
             public DFBlock.EnemyGenders forcedGender;
             public bool isTransparent;
             public bool isSkeletal;
+            public int spiderReplacement = -1;
         }
 
         private Dictionary<int, CustomEnemyProperties> customEnemies = new Dictionary<int, CustomEnemyProperties>();
@@ -110,7 +114,15 @@ namespace DaggerfallBestiaryProject
             Instance = go.AddComponent<BestiaryMod>();
             mod.SaveDataInterface = go.AddComponent<BestiarySaveInterface>();
 
+            mod.LoadSettingsCallback += LoadSettings;
+            mod.LoadSettings();
+
             mod.IsReady = true;
+        }
+        
+        static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
+        {
+            disableSpiders = modSettings.GetBool("Core", "DisableSpiders");
         }
 
         private void Start()
@@ -702,6 +714,7 @@ namespace DaggerfallBestiaryProject
                 int? ForcedGenderIndex = GetIndexOpt("ForcedGender");
                 int? GlowColorIndex = GetIndexOpt("GlowColor");
                 int? TransparentIndex = GetIndexOpt("Transparent");
+                int? SpiderReplacementIndex = GetIndexOpt("SpiderReplacement");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -1183,6 +1196,11 @@ namespace DaggerfallBestiaryProject
                             customEnemyProperties.isTransparent = ParseBool(tokens[TransparentIndex.Value], $"line={lineNumber}, column={TransparentIndex.Value + 1}");
                         }
 
+                        if(SpiderReplacementIndex.HasValue && !string.IsNullOrEmpty(tokens[SpiderReplacementIndex.Value]))
+                        {
+                            customEnemyProperties.spiderReplacement = int.Parse(tokens[SpiderReplacementIndex.Value]);
+                        }
+
                         if (!enemyReplacement)
                         {
                             if (!customCareers.TryGetValue(customEnemyProperties.career, out CustomCareer customCareer))
@@ -1565,7 +1583,25 @@ namespace DaggerfallBestiaryProject
             EncounterTable selectedTable = tables[UnityEngine.Random.Range(0, tables.Count)];
 
             ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[index];
-            table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
+
+            MobileTypes GetMobileType(int id)
+            {
+                if (disableSpiders)
+                {
+                    if (GetCustomEnemyProperties(id, out CustomEnemyProperties props))
+                    {
+                        if (props.spiderReplacement >= 0)
+                        {
+                            return (MobileTypes)props.spiderReplacement;
+                        }
+                    }
+                }
+
+                return (MobileTypes)id;
+            }
+
+
+            table.Enemies = selectedTable.enemyIds.Select(GetMobileType).ToArray();
         }
 
         private void PlayerEnterExit_OnPreTransition(PlayerEnterExit.TransitionEventArgs args)
