@@ -1,8 +1,8 @@
 [
     {
         "index": 500,
-        "spellName": "!BloodSpiderSuck",
         "element": 2,
+        "spellName": "!Blood Leech",
         "rangeType": 1,
         "icon": 8,
         "effects": [
@@ -19,7 +19,7 @@
     },
     {
         "index": 501,
-        "spellName": "!DaemonFireTouch",
+        "spellName": "!Daemon Touch",
         "element": 0,
         "rangeType": 1,
         "icon": 58,
@@ -46,7 +46,7 @@
     },
     {
         "index": 502,
-        "spellName": "!WispDrain",
+        "spellName": "!Wrack",
         "element": 4,
         "rangeType": 1,
         "icon": 21,
@@ -76,7 +76,7 @@
     },
     {
         "index": 503,
-        "spellName": "!VengeanceBolt",
+        "spellName": "!Bolt of Vengeance",
         "element": 3,
         "rangeType": 4,
         "icon": 39,
