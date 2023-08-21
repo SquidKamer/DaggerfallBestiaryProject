@@ -1166,11 +1166,13 @@ namespace DaggerfallBestiaryProject
                                 Spellbook spellbook = new Spellbook();
                                 spellbook.spellIds = ParseArrayArg(spellBookToken, $"line={lineNumber}, column={SpellBookIndex.Value + 1}");
 
-                                SpellbookTable spellbookTable = new SpellbookTable();
-                                spellbookTable.spellbooks = new Spellbook[] { spellbook };
-
                                 string rawSpellbookName = mobile.ID.ToString();
-                                spellbookTables.Add(rawSpellbookName, spellbookTable);
+                                if(!spellbookTables.TryGetValue(rawSpellbookName, out SpellbookTable spellbookTable))
+                                {
+                                    spellbookTable = new SpellbookTable();
+                                    spellbookTables.Add(rawSpellbookName, spellbookTable);
+                                }
+                                spellbookTable.spellbooks = new Spellbook[] { spellbook };
 
                                 customEnemyProperties.spellbookTable = rawSpellbookName;
                             }
