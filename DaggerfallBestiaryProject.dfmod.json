@@ -7426,6 +7426,14 @@
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_5-11.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_7-16.png",
         "Assets/Game/Mods/DaggerfallBestiaryProject/Textures/MORROWIND - DwarvenSteam/1640_5-8.png",
-        "Assets/Game/Mods/DaggerfallBestiaryProject/modsettings.json"
+        "Assets/Game/Mods/DaggerfallBestiaryProject/modsettings.json",
+        "Assets/Game/Mods/DaggerfallBestiaryProject/Scripts/Compatibility/DEX_RRICompat.cs"
+    ],
+    "Dependencies": [
+        {
+            "Name": "roleplayrealism-items",
+            "IsOptional": true,
+            "IsPeer": false
+        }
     ]
 }

@@ -54,6 +54,7 @@ namespace DaggerfallBestiaryProject
             public bool isTransparent;
             public bool isSkeletal;
             public int spiderReplacement = -1;
+            public string equipmentTable;
         }
 
         private Dictionary<int, CustomEnemyProperties> customEnemies = new Dictionary<int, CustomEnemyProperties>();
@@ -62,7 +63,7 @@ namespace DaggerfallBestiaryProject
 
         private Dictionary<int, CustomEnemyProperties> classicEnemies = new Dictionary<int, CustomEnemyProperties>();
 
-        bool GetCustomEnemyProperties(int mobileID, out CustomEnemyProperties customEnemyProperties)
+        public bool GetCustomProperties(int mobileID, out CustomEnemyProperties customEnemyProperties)
         {
             return classicEnemies.TryGetValue(mobileID, out customEnemyProperties) || customEnemies.TryGetValue(mobileID, out customEnemyProperties);
         }
@@ -146,6 +147,10 @@ namespace DaggerfallBestiaryProject
             PlayerGPS.OnClimateIndexChanged += PlayerGPS_OnClimateIndexChanged;
 
             EnemyDeath.OnEnemyDeath += EnemyDeath_OnEnemyDeath;
+
+            EnemyEntity.AssignEnemyEquipment = AssignEnemyStartingEquipment;
+
+            DEX_RRICompat.OnStart();
         }
 
         List<EncounterTable> GetIndexEncounterTables(int index)
@@ -715,6 +720,7 @@ namespace DaggerfallBestiaryProject
                 int? GlowColorIndex = GetIndexOpt("GlowColor");
                 int? TransparentIndex = GetIndexOpt("Transparent");
                 int? SpiderReplacementIndex = GetIndexOpt("SpiderReplacement");
+                int? EquipmentTableIndex = GetIndexOpt("EquipmentTable");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -1203,6 +1209,11 @@ namespace DaggerfallBestiaryProject
                             customEnemyProperties.spiderReplacement = int.Parse(tokens[SpiderReplacementIndex.Value]);
                         }
 
+                        if(EquipmentTableIndex.HasValue && !string.IsNullOrEmpty(tokens[EquipmentTableIndex.Value]))
+                        {
+                            customEnemyProperties.equipmentTable = tokens[EquipmentTableIndex.Value];
+                        }
+
                         if (!enemyReplacement)
                         {
                             if (!customCareers.TryGetValue(customEnemyProperties.career, out CustomCareer customCareer))
@@ -1240,7 +1251,7 @@ namespace DaggerfallBestiaryProject
             if (enemyEntity == null)
                 return;
 
-            if (!GetCustomEnemyProperties(args.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
+            if (!GetCustomProperties(args.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
                 return;
 
             // Spellbook
@@ -1357,7 +1368,7 @@ namespace DaggerfallBestiaryProject
             };
 
             int customEffect = 0;
-            if(GetCustomEnemyProperties(attacker.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
+            if(GetCustomProperties(attacker.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
             {
                 customEffect = customEnemyProperties.onHitEffect;
             }
@@ -1482,7 +1493,7 @@ namespace DaggerfallBestiaryProject
                 bool isSkeletal = targetEnemy.MobileEnemy.ID == (int)MonsterCareers.SkeletalWarrior;
                 if(!isSkeletal)
                 {
-                    if(GetCustomEnemyProperties(targetEnemy.MobileEnemy.ID, out CustomEnemyProperties customEnemy))
+                    if(GetCustomProperties(targetEnemy.MobileEnemy.ID, out CustomEnemyProperties customEnemy))
                     {
                         isSkeletal = customEnemy.isSkeletal;
                     }
@@ -1590,7 +1601,7 @@ namespace DaggerfallBestiaryProject
             {
                 if (disableSpiders)
                 {
-                    if (GetCustomEnemyProperties(id, out CustomEnemyProperties props))
+                    if (GetCustomProperties(id, out CustomEnemyProperties props))
                     {
                         if (props.spiderReplacement >= 0)
                         {
@@ -1956,6 +1967,18 @@ namespace DaggerfallBestiaryProject
                     default:
                         return DFCareer.Skills.None;
                 }
+            }
+        }
+
+        void AssignEnemyStartingEquipment(PlayerEntity playerEntity, EnemyEntity enemyEntity, int variant)
+        {
+            if (DEX_RRICompat.hasRRIRealisticEnemyEquipment)
+            {
+                DEX_RRICompat.AssignEnemyStartingEquipment(playerEntity, enemyEntity, variant);
+            }
+            else
+            {
+                DaggerfallUnity.Instance.ItemHelper.AssignEnemyStartingEquipment(playerEntity, enemyEntity, variant);
             }
         }
     }
