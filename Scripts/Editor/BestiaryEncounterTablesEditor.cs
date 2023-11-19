@@ -419,7 +419,7 @@ namespace DaggerfallBestiaryProject
 
                 string header = stream.ReadLine();
 
-                string[] fields = header.Split(';', ',');
+                string[] fields = header.Split(';', ',').Select(field => field.Trim('\"')).ToArray();
 
                 bool GetIndex(string fieldName, out int index)
                 {
@@ -521,7 +521,7 @@ namespace DaggerfallBestiaryProject
 
             string header = stream.ReadLine();
 
-            string[] fields = header.Split(';', ',');
+            string[] fields = header.Split(';', ',').Select(field => field.Trim('\"')).ToArray();
 
             if (fields.Length != 22)
             {
