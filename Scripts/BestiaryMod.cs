@@ -118,12 +118,45 @@ namespace DaggerfallBestiaryProject
             mod.LoadSettingsCallback += LoadSettings;
             mod.LoadSettings();
 
+            mod.MessageReceiver = ModMessage;
+
             mod.IsReady = true;
         }
         
         static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
         {
             disableSpiders = modSettings.GetBool("Core", "DisableSpiders");
+        }
+
+        static void ModMessage(string message, object data, DFModMessageCallback callBack)
+        {
+            switch(message)
+            {
+            case "getEnemySpells":
+                var (mobileId, level) = (System.Tuple<int, int>)data;
+                if(!Instance.GetCustomProperties(mobileId, out CustomEnemyProperties customEnemy))
+                {
+                    callBack(message, null);
+                }
+                else
+                {
+                    if(string.IsNullOrEmpty(customEnemy.spellbookTable))
+                    {
+                        callBack(message, null);
+                    }
+                    else if(!Instance.spellbookTables.TryGetValue(customEnemy.spellbookTable, out SpellbookTable spellbookTable))
+                    {
+                        Debug.LogError($"Unknown enemy spell table '{customEnemy.spellbookTable}'");
+                        callBack(message, null);
+                    }
+                    else
+                    { 
+                        Spellbook spellbook = spellbookTable.GetSpellbook(level);
+                        callBack(message, spellbook.spellIds);
+                    }
+                }
+                break;
+            }
         }
 
         private void Start()
