@@ -66,6 +66,9 @@ namespace DaggerfallBestiaryProject
 
         static void AddAndEquipWornItem(DaggerfallEntity entity, DaggerfallUnityItem item)
         {
+            if (item == null)
+                return;
+
             AddWornItem(entity, item);
             entity.ItemEquipTable.EquipItem(item, true, false);
         }
@@ -95,6 +98,9 @@ namespace DaggerfallBestiaryProject
 
         static DaggerfallUnityItem CreateWeapon(int templateIndex, WeaponMaterialTypes material)
         {
+            if (templateIndex == -1)
+                return null;
+
             DaggerfallUnityItem weapon = ItemBuilder.CreateItem(ItemGroups.Weapons, templateIndex);
             ItemBuilder.ApplyWeaponMaterial(weapon, material);
             return weapon;
@@ -102,6 +108,9 @@ namespace DaggerfallBestiaryProject
 
         static DaggerfallUnityItem CreateArmor(Genders gender, Races race, int templateIndex, ArmorMaterialTypes material)
         {
+            if (templateIndex == -1)
+                return null;
+
             DaggerfallUnityItem armor = ItemBuilder.CreateItem(ItemGroups.Armor, templateIndex);
             ItemBuilder.ApplyArmorSettings(armor, gender, race, material);
             return armor;
