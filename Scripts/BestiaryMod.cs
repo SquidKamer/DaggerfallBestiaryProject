@@ -118,7 +118,7 @@ namespace DaggerfallBestiaryProject
             Instance = go.AddComponent<BestiaryMod>();
             mod.SaveDataInterface = go.AddComponent<BestiarySaveInterface>();
 
-            mod.LoadSettingsCallback += LoadSettings;
+            mod.LoadSettingsCallback = LoadSettings;
             mod.LoadSettings();
 
             mod.MessageReceiver = ModMessage;
