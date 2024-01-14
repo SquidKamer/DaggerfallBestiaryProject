@@ -74,6 +74,9 @@ namespace DaggerfallBestiaryProject
             if (!entityStarted)
                 return;
 
+            if (BestiaryMod.DisableTrollRespawn)
+                return;
+
             respawnBuffer -= Time.deltaTime;
 
             if(respawnBuffer <= 0.0f)

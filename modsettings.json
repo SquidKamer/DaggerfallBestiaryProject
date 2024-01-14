@@ -15,6 +15,21 @@
                 }
             ],
             "$version": "v1"
+        },
+        {
+            "Name": "Cheat",
+            "Description": "Cheat settings",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": false,
+                    "Name": "DisableTrollRespawn",
+                    "Description": "Prevent trolls from respawning after death (use for No Magic runs)",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
         }
     ]
 }
