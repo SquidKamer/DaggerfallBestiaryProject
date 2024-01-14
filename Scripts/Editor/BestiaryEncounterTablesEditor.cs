@@ -611,6 +611,10 @@ namespace DaggerfallBestiaryProject
                             customEnemyUseCount.Add(enemyId, 1);
                         }
                     }
+                    else
+                    {
+                        Debug.LogError($"Invalid enemy '{enemyId}' in encounter table '{encounterTable.Name}'");
+                    }
                 }
             }
         }
