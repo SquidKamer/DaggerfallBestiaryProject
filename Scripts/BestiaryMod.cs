@@ -29,6 +29,9 @@ namespace DaggerfallBestiaryProject
         private static Mod mod;
 
         private static bool disableSpiders = false;
+        private static bool disableTrollRespawn = false;
+
+        public static bool DisableTrollRespawn { get { return disableTrollRespawn; } }
 
         public static BestiaryMod Instance { get; private set; }
         public static BestiarySaveInterface SaveInterface { get { return Instance.GetComponent<BestiarySaveInterface>(); } }
@@ -126,6 +129,7 @@ namespace DaggerfallBestiaryProject
         static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
         {
             disableSpiders = modSettings.GetBool("Core", "DisableSpiders");
+            disableTrollRespawn = modSettings.GetBool("Cheat", "DisableTrollRespawn");
         }
 
         static void ModMessage(string message, object data, DFModMessageCallback callBack)
