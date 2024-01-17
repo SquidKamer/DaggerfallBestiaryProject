@@ -634,7 +634,7 @@ namespace DaggerfallBestiaryProject
             }
 
             string[] Frames = Arg.Split(',', ';');
-            return Frames.Select(Frame => string.IsNullOrEmpty(Frame) ? "-1" : Frame).Select(float.Parse).ToArray();
+            return Frames.Select(Frame => string.IsNullOrEmpty(Frame) ? "-1" : Frame).Select(s => float.Parse(s, CultureInfo.InvariantCulture)).ToArray();
         }
 
         bool ParseBool(string Value, string Context)
