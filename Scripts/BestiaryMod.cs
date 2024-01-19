@@ -285,7 +285,7 @@ namespace DaggerfallBestiaryProject
 
         void ParseDfCareers()
         {
-            foreach(MonsterCareers career in Enum.GetValues(typeof(MonsterCareers)).Cast<MonsterCareers>().Skip(1))
+            foreach(MonsterCareers career in Enum.GetValues(typeof(MonsterCareers)).Cast<MonsterCareers>())
             {
                 DFCareer dfCareer = DaggerfallEntity.GetMonsterCareerTemplate(career);
                 if(dfCareer != null)
@@ -294,7 +294,7 @@ namespace DaggerfallBestiaryProject
                 }
             }
 
-            foreach (ClassCareers career in Enum.GetValues(typeof(ClassCareers)).Cast<ClassCareers>().Skip(1))
+            foreach (ClassCareers career in Enum.GetValues(typeof(ClassCareers)).Cast<ClassCareers>())
             {
                 DFCareer dfCareer = DaggerfallEntity.GetClassCareerTemplate(career);
                 if (dfCareer != null)
