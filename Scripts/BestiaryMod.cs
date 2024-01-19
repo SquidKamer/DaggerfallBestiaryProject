@@ -1068,7 +1068,15 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            mobile.MoveSound = -1;
+                            if(IsMonster(mobile.ID))
+                            {
+                                Debug.LogWarning($"Monster '{mobile.ID}' does not have a defined MoveSound. This can cause issues.");
+                                mobile.MoveSound = -1;
+                            }
+                            else
+                            {
+                                mobile.MoveSound = 243; // Default class move
+                            }
                         }
 
                         if (BarkSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[BarkSoundIndex.Value]))
@@ -1077,7 +1085,15 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement)
                         {
-                            mobile.BarkSound = -1;
+                            if (IsMonster(mobile.ID))
+                            {
+                                Debug.LogWarning($"Monster '{mobile.ID}' does not have a defined BarkSound. This can cause issues.");
+                                mobile.BarkSound = -1;
+                            }
+                            else
+                            {
+                                mobile.BarkSound = 244; // Default class bark
+                            }
                         }
 
                         if (AttackSoundIndex.HasValue && !string.IsNullOrEmpty(tokens[AttackSoundIndex.Value]))
@@ -1086,7 +1102,15 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement)
                         {
-                            mobile.AttackSound = -1;
+                            if (IsMonster(mobile.ID))
+                            {
+                                Debug.LogWarning($"Monster '{mobile.ID}' does not have a defined AttackSound. This can cause issues.");
+                                mobile.BarkSound = -1;
+                            }
+                            else
+                            {
+                                mobile.BarkSound = 245; // Default class attack
+                            }
                         }
 
                         if (ParrySoundsIndex.HasValue && !string.IsNullOrEmpty(tokens[ParrySoundsIndex.Value]))
