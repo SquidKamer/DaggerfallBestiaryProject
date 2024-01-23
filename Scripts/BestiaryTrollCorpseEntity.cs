@@ -10,6 +10,8 @@ namespace DaggerfallBestiaryProject
     {
         public int MobileID;
         public float BillboardHeight;
+        public int AshCorpseArchive;
+        public int AshCorpseRecord;
     }
 
     public class BestiaryTrollCorpseEntity : DaggerfallEntity
@@ -60,7 +62,7 @@ namespace DaggerfallBestiaryProject
                     DaggerfallUI.Instance.PopupMessage(deathMessage);
 
                 // Generate corpse
-                GameObject corpse = GameObjectHelper.CreateDaggerfallBillboardGameObject(254, 47, GameObjectHelper.GetBestParent());
+                GameObject corpse = GameObjectHelper.CreateDaggerfallBillboardGameObject(enemyProperties.AshCorpseArchive, enemyProperties.AshCorpseRecord, GameObjectHelper.GetBestParent());
                 corpse.transform.position = EntityBehaviour.transform.position + new Vector3(0.0f, -CorpseBillboardHeight / 2.0f + 0.1f, 0.0f);
 
                 Object.Destroy(EntityBehaviour.transform.parent.gameObject);
