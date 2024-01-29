@@ -2,21 +2,6 @@
     "Version": null,
     "Sections": [
         {
-            "Name": "Core",
-            "Description": "Main settings",
-            "IsAdvanced": false,
-            "Keys": [
-                {
-                    "Value": false,
-                    "Name": "DisableSpiders",
-                    "Description": "Removes spider enemies from encounter tables (quests unaffected)",
-                    "$version": "v1",
-                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
-                }
-            ],
-            "$version": "v1"
-        },
-        {
             "Name": "Cheat",
             "Description": "Cheat settings",
             "IsAdvanced": false,

@@ -28,7 +28,6 @@ namespace DaggerfallBestiaryProject
     {
         private static Mod mod;
 
-        private static bool disableSpiders = false;
         private static bool disableTrollRespawn = false;
 
         public static bool DisableTrollRespawn { get { return disableTrollRespawn; } }
@@ -56,7 +55,6 @@ namespace DaggerfallBestiaryProject
             public DFBlock.EnemyGenders forcedGender;
             public bool isTransparent;
             public bool isSkeletal;
-            public int spiderReplacement = -1;
             public string equipmentTable;
         }
 
@@ -128,7 +126,6 @@ namespace DaggerfallBestiaryProject
         
         static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
         {
-            disableSpiders = modSettings.GetBool("Core", "DisableSpiders");
             disableTrollRespawn = modSettings.GetBool("Cheat", "DisableTrollRespawn");
         }
 
@@ -756,7 +753,6 @@ namespace DaggerfallBestiaryProject
                 int? ForcedGenderIndex = GetIndexOpt("ForcedGender");
                 int? GlowColorIndex = GetIndexOpt("GlowColor");
                 int? TransparentIndex = GetIndexOpt("Transparent");
-                int? SpiderReplacementIndex = GetIndexOpt("SpiderReplacement");
                 int? EquipmentTableIndex = GetIndexOpt("EquipmentTable");
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
@@ -1265,11 +1261,6 @@ namespace DaggerfallBestiaryProject
                             customEnemyProperties.isTransparent = ParseBool(tokens[TransparentIndex.Value], $"line={lineNumber}, column={TransparentIndex.Value + 1}");
                         }
 
-                        if(SpiderReplacementIndex.HasValue && !string.IsNullOrEmpty(tokens[SpiderReplacementIndex.Value]))
-                        {
-                            customEnemyProperties.spiderReplacement = int.Parse(tokens[SpiderReplacementIndex.Value]);
-                        }
-
                         if(EquipmentTableIndex.HasValue && !string.IsNullOrEmpty(tokens[EquipmentTableIndex.Value]))
                         {
                             customEnemyProperties.equipmentTable = tokens[EquipmentTableIndex.Value];
@@ -1658,24 +1649,7 @@ namespace DaggerfallBestiaryProject
 
             ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[index];
 
-            MobileTypes GetMobileType(int id)
-            {
-                if (disableSpiders)
-                {
-                    if (GetCustomProperties(id, out CustomEnemyProperties props))
-                    {
-                        if (props.spiderReplacement >= 0)
-                        {
-                            return (MobileTypes)props.spiderReplacement;
-                        }
-                    }
-                }
-
-                return (MobileTypes)id;
-            }
-
-
-            table.Enemies = selectedTable.enemyIds.Select(GetMobileType).ToArray();
+            table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
         }
 
         private void PlayerEnterExit_OnPreTransition(PlayerEnterExit.TransitionEventArgs args)
