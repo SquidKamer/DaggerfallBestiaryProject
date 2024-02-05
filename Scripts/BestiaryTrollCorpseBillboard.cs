@@ -17,6 +17,8 @@ namespace DaggerfallBestiaryProject
     {
         public int Archive = 1618;
         public int Record = 20;
+        public int AshArchive = 1618;
+        public int AshRecord = 21;
 
         public float RespawnTime = 10.0f;
 
@@ -243,6 +245,8 @@ namespace DaggerfallBestiaryProject
         {
             enemyProperties.MobileID = enemyMobile.Enemy.ID;
             enemyProperties.BillboardHeight = enemyMobile.Summary.RecordSizes[0].y;
+            enemyProperties.AshCorpseArchive = AshArchive;
+            enemyProperties.AshCorpseRecord = AshRecord;
         }
 
         public void PostParentedSetup()
