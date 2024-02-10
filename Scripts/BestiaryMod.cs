@@ -45,7 +45,6 @@ namespace DaggerfallBestiaryProject
 
         public class CustomEnemyProperties
         {
-            public MobileEnemy mobileEnemy;
             public string name;
             public string career;
             public DFCareer.EnemyGroups group = DFCareer.EnemyGroups.None;
@@ -55,6 +54,8 @@ namespace DaggerfallBestiaryProject
             public DFBlock.EnemyGenders forcedGender;
             public bool isTransparent;
             public bool isSkeletal;
+            public bool hasRangedAttack;
+            public bool hasNoSpellAnimations;
             public string equipmentTable;
         }
 
@@ -66,7 +67,14 @@ namespace DaggerfallBestiaryProject
 
         public bool GetCustomProperties(int mobileID, out CustomEnemyProperties customEnemyProperties)
         {
-            return classicEnemies.TryGetValue(mobileID, out customEnemyProperties) || customEnemies.TryGetValue(mobileID, out customEnemyProperties);
+            if(Enum.IsDefined(typeof(MobileTypes), mobileID))
+            {
+                return classicEnemies.TryGetValue(mobileID, out customEnemyProperties);
+            }
+            else
+            {
+                return customEnemies.TryGetValue(mobileID, out customEnemyProperties);
+            }            
         }
 
         public class EncounterTable
@@ -415,7 +423,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have HitPointsPerLevel specified");
+                            Debug.LogError($"Career '{careerName}' did not have HitPointsPerLevel specified");
                             continue;
                         }
 
@@ -786,6 +794,73 @@ namespace DaggerfallBestiaryProject
                             mobile.ID = mobileID;
                         }
 
+                        CustomEnemyProperties customEnemyProperties;
+
+                        if (classicReplacement)
+                        {
+                            if (!classicEnemies.TryGetValue(mobileID, out customEnemyProperties))
+                            {
+                                customEnemyProperties = new CustomEnemyProperties();
+                                InitializeDefaultClassicCustomProperties(mobileID, customEnemyProperties);
+                                classicEnemies.Add(mobileID, customEnemyProperties);
+                            }
+                        }
+                        else if (!customEnemies.TryGetValue(mobileID, out customEnemyProperties))
+                        {
+                            customEnemyProperties = new CustomEnemyProperties();
+                        }
+
+                        if (NameIndex.HasValue && !string.IsNullOrEmpty(tokens[NameIndex.Value]))
+                        {
+                            customEnemyProperties.name = tokens[NameIndex.Value];
+                        }
+                        else if (!enemyReplacement)
+                        {
+                            Debug.LogError($"Enemy '{mobile.ID}' did not have a Name specified.");
+                            continue;
+                        }
+
+                        string enemyName;
+                        if (!string.IsNullOrEmpty(customEnemyProperties.name))
+                        {
+                            enemyName = customEnemyProperties.name;
+                        }
+                        else 
+                        {
+                            enemyName = TextManager.Instance.GetLocalizedEnemyName(mobileID);
+                        }
+
+                        if (CareerIndex.HasValue && !string.IsNullOrEmpty(tokens[CareerIndex.Value]))
+                        {
+                            customEnemyProperties.career = tokens[CareerIndex.Value];
+                        }
+                        else if (!enemyReplacement)
+                        {
+                            Debug.LogError($"Enemy '{enemyName}' did not have a Career specified.");
+                            continue;
+                        }
+
+                        string careerName;
+                        if(!string.IsNullOrEmpty(customEnemyProperties.career))
+                        {
+                            careerName = customEnemyProperties.career;
+                        }
+                        else if(classicReplacement)
+                        {
+                            careerName = GetClassicCareerName(mobileID);
+                        }
+                        else
+                        {
+                            Debug.LogError($"Enemy '{enemyName}' has no defined career");
+                            continue;
+                        }
+
+                        if (!customCareers.TryGetValue(careerName, out CustomCareer customCareer))
+                        {
+                            Debug.LogError($"Enemy '{enemyName}' has unknown career '{careerName}'");
+                            continue;
+                        }
+
                         if (BehaviourIndex.HasValue && !string.IsNullOrEmpty(tokens[BehaviourIndex.Value]))
                         {
                             mobile.Behaviour = (MobileBehaviour)Enum.Parse(typeof(MobileBehaviour), tokens[BehaviourIndex.Value], ignoreCase: true);
@@ -811,7 +886,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Monster '{mobile.ID}' did not have a Team specified.");
+                            Debug.LogError($"Enemy '{enemyName}' did not have a Team specified.");
                             continue;
                         }
 
@@ -821,7 +896,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Monster '{mobile.ID}' did not have a MaleTexture specified.");
+                            Debug.LogError($"Enemy '{enemyName}' did not have a MaleTexture specified.");
                             continue;
                         }
 
@@ -831,7 +906,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Monster '{mobile.ID}' did not have a FemaleTexture specified.");
+                            Debug.LogError($"Enemy '{enemyName}' did not have a FemaleTexture specified.");
                             continue;
                         }
 
@@ -844,7 +919,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Monster '{mobile.ID}' did not have a CorpseTextureArchive or CorpseTextureRecord specified.");
+                            Debug.LogError($"Enemy '{enemyName}' did not have a CorpseTextureArchive or CorpseTextureRecord specified.");
                             continue;
                         }
 
@@ -864,41 +939,53 @@ namespace DaggerfallBestiaryProject
                         if (CastsMagicIndex.HasValue && !string.IsNullOrEmpty(tokens[CastsMagicIndex.Value]))
                         {
                             mobile.CastsMagic = ParseBool(tokens[CastsMagicIndex.Value], $"line={lineNumber}, column={CastsMagicIndex + 1}");
-                            mobile.HasSpellAnimation = mobile.CastsMagic;
                         }
 
                         if (NoSpellAnimsIndex.HasValue && !string.IsNullOrEmpty(tokens[NoSpellAnimsIndex.Value]))
                         {
-                            mobile.HasSpellAnimation = !ParseBool(tokens[NoSpellAnimsIndex.Value], $"line={lineNumber}, column={NoSpellAnimsIndex + 1}");
+                            customEnemyProperties.hasNoSpellAnimations = ParseBool(tokens[NoSpellAnimsIndex.Value], $"line={lineNumber}, column={NoSpellAnimsIndex + 1}");
                         }
 
                         if (HasRangedAttackIndex.HasValue && !string.IsNullOrEmpty(tokens[HasRangedAttackIndex.Value]))
                         {
-                            mobile.HasRangedAttack1 = ParseBool(tokens[HasRangedAttackIndex.Value], $"line={lineNumber}, column={HasRangedAttackIndex + 1}");
+                            customEnemyProperties.hasRangedAttack = ParseBool(tokens[HasRangedAttackIndex.Value], $"line={lineNumber}, column={HasRangedAttackIndex + 1}");
                         }
 
-                        if (mobile.HasRangedAttack1 && (!enemyReplacement || mobile.RangedAttackAnimFrames == null))
+                        if (customEnemyProperties.hasRangedAttack && mobile.RangedAttackAnimFrames == null)
                         {
                             mobile.RangedAttackAnimFrames = new int[] { 3, 2, 0, 0, 0, -1, 1, 1, 2, 3 };
                         }
 
+                        // Update mobile "ranged attack" properties based on DEX properties
                         if (mobile.CastsMagic)
                         {
-                            if (mobile.HasRangedAttack1)
+                            if (customEnemyProperties.hasRangedAttack)
                             {
                                 // We have both ranged and casting
+                                mobile.HasRangedAttack1 = true;
                                 mobile.HasRangedAttack2 = true;
                             }
                             else
                             {
                                 // Casting is our only ranged attack
                                 mobile.HasRangedAttack1 = true;
+                                mobile.HasRangedAttack2 = false;
                             }
 
-                            if (!enemyReplacement || mobile.SpellAnimFrames == null)
+                            if(!customEnemyProperties.hasNoSpellAnimations)
+                            {
+                                mobile.HasSpellAnimation = true;
+                            }
+
+                            if (mobile.SpellAnimFrames == null)
                             {
                                 mobile.SpellAnimFrames = new int[] { 0, 1, 2, 3, 3 };
                             }
+                        }
+                        else
+                        {
+                            mobile.HasRangedAttack1 = customEnemyProperties.hasRangedAttack;
+                            mobile.HasRangedAttack2 = false;
                         }
                                                 
                         if (PrimaryAttackAnimFramesIndex.HasValue && !string.IsNullOrEmpty(tokens[PrimaryAttackAnimFramesIndex.Value]))
@@ -964,7 +1051,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a level specified. Defaulting to 1");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have a level specified. Defaulting to 1");
                             mobile.Level = 1;
                         }
 
@@ -974,7 +1061,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a min damage specified. Defaulting to 1");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have a min damage specified. Defaulting to 1");
                             mobile.MinDamage = 1;
                         }
 
@@ -984,7 +1071,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a max damage specified. Defaulting to {mobile.MinDamage + 1}");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have a max damage specified. Defaulting to {mobile.MinDamage + 1}");
                             mobile.MaxDamage = mobile.MinDamage + 1;
                         }
 
@@ -1014,7 +1101,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a min health specified. Defaulting to 1");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have a min health specified. Defaulting to 1");
                             mobile.MinHealth = 1;
                         }
 
@@ -1024,7 +1111,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a max health specified. Defaulting to {mobile.MinHealth + 1}");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have a max health specified. Defaulting to {mobile.MinHealth + 1}");
                             mobile.MaxHealth = mobile.MinHealth + 1;
                         }
 
@@ -1034,7 +1121,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have an armor value specified. Defaulting to 0");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have an armor value specified. Defaulting to 0");
                             mobile.ArmorValue = 0;
                         }
 
@@ -1049,7 +1136,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{mobile.ID}' did not have a weight specified. Defaulting to 100");
+                            Debug.LogWarning($"Monster '{enemyName}' did not have a weight specified. Defaulting to 100");
                             mobile.Weight = 100;
                         }
 
@@ -1066,7 +1153,7 @@ namespace DaggerfallBestiaryProject
                         {
                             if(IsMonster(mobile.ID))
                             {
-                                Debug.LogWarning($"Monster '{mobile.ID}' does not have a defined MoveSound. This can cause issues.");
+                                Debug.LogWarning($"Monster '{enemyName}' does not have a defined MoveSound. This can cause issues.");
                                 mobile.MoveSound = -1;
                             }
                             else
@@ -1083,7 +1170,7 @@ namespace DaggerfallBestiaryProject
                         {
                             if (IsMonster(mobile.ID))
                             {
-                                Debug.LogWarning($"Monster '{mobile.ID}' does not have a defined BarkSound. This can cause issues.");
+                                Debug.LogWarning($"Monster '{enemyName}' does not have a defined BarkSound. This can cause issues.");
                                 mobile.BarkSound = -1;
                             }
                             else
@@ -1100,7 +1187,7 @@ namespace DaggerfallBestiaryProject
                         {
                             if (IsMonster(mobile.ID))
                             {
-                                Debug.LogWarning($"Monster '{mobile.ID}' does not have a defined AttackSound. This can cause issues.");
+                                Debug.LogWarning($"Monster '{enemyName}' does not have a defined AttackSound. This can cause issues.");
                                 mobile.BarkSound = -1;
                             }
                             else
@@ -1151,7 +1238,7 @@ namespace DaggerfallBestiaryProject
                             float[] components = ParseFloatArrayArg(tokens[GlowColorIndex.Value], $"line={lineNumber},column={GlowColorIndex}");
                             if(components.Length < 3)
                             {
-                                Debug.LogError($"Monster '{mobileID}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
+                                Debug.LogError($"Enemy '{enemyName}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
                             }
                             else
                             {
@@ -1162,51 +1249,8 @@ namespace DaggerfallBestiaryProject
                                 mobile.GlowColor = glowColor;
                             }                
                         }
-
-                        // Classic properties replacement stops here
-                        if(enemyReplacement)
-                        {
-                            enemies[enemyReplacementIndex] = mobile;
-                        }
-
-                        CustomEnemyProperties customEnemyProperties;
-
-                        if (Enum.IsDefined(typeof(MobileTypes), mobileID))
-                        {
-                            if (!classicEnemies.TryGetValue(mobileID, out customEnemyProperties))
-                            {
-                                customEnemyProperties = new CustomEnemyProperties();
-                                customEnemyProperties.mobileEnemy = mobile;
-                                classicEnemies.Add(mobileID, customEnemyProperties);
-                            }
-                        }
-                        else if(!customEnemies.TryGetValue(mobileID, out customEnemyProperties))
-                        {
-                            customEnemyProperties = new CustomEnemyProperties();
-                            customEnemyProperties.mobileEnemy = mobile;
-                        }
-
-                        customEnemyProperties.isSkeletal = isSkeletal;
-
-                        if (NameIndex.HasValue && !string.IsNullOrEmpty(tokens[NameIndex.Value]))
-                        {
-                            customEnemyProperties.name = tokens[NameIndex.Value];
-                        }
-                        else if(!enemyReplacement)
-                        {
-                            Debug.LogError($"Monster '{mobile.ID}' did not have a Name specified.");
-                            continue;
-                        }
-
-                        if (CareerIndex.HasValue && !string.IsNullOrEmpty(tokens[CareerIndex.Value]))
-                        {
-                            customEnemyProperties.career = tokens[CareerIndex.Value];
-                        }
-                        else if(!enemyReplacement)
-                        {
-                            Debug.LogError($"Monster '{mobile.ID}' did not have a Career specified.");
-                            continue;
-                        }
+                                                                        
+                        customEnemyProperties.isSkeletal = isSkeletal;                                              
 
                         if (GroupIndex.HasValue && !string.IsNullOrEmpty(tokens[GroupIndex.Value]))
                         {
@@ -1229,7 +1273,7 @@ namespace DaggerfallBestiaryProject
                                 Spellbook spellbook = new Spellbook();
                                 spellbook.spellIds = ParseArrayArg(spellBookToken, $"line={lineNumber}, column={SpellBookIndex.Value + 1}");
 
-                                string rawSpellbookName = mobile.ID.ToString();
+                                string rawSpellbookName = mobileID.ToString();
                                 if(!spellbookTables.TryGetValue(rawSpellbookName, out SpellbookTable spellbookTable))
                                 {
                                     spellbookTable = new SpellbookTable();
@@ -1268,22 +1312,20 @@ namespace DaggerfallBestiaryProject
 
                         if (!enemyReplacement)
                         {
-                            if (!customCareers.TryGetValue(customEnemyProperties.career, out CustomCareer customCareer))
-                            {
-                                Debug.LogError($"Monster '{mobile.ID}' has unknown career '{customEnemyProperties.career}'");
-                                continue;
-                            }
-
-                            customEnemies.Add(mobile.ID, customEnemyProperties);
+                            customEnemies.Add(mobileID, customEnemyProperties);
                             enemies.Add(mobile);
 
-                            DaggerfallEntity.RegisterCustomCareerTemplate(mobile.ID, customCareer.dfCareer);
+                            DaggerfallEntity.RegisterCustomCareerTemplate(mobileID, customCareer.dfCareer);
 
                             string questName = customEnemyProperties.name.Replace(' ', '_');
                             if (!QuestMachine.Instance.FoesTable.HasValue(questName))
                             {
-                                questEnemyLines.Add($"{mobile.ID}, {questName}");
+                                questEnemyLines.Add($"{mobileID}, {questName}");
                             }
+                        }
+                        else
+                        {
+                            enemies[enemyReplacementIndex] = mobile;
                         }
                     }
                     catch (Exception ex)
@@ -1303,7 +1345,9 @@ namespace DaggerfallBestiaryProject
             if (enemyEntity == null)
                 return;
 
-            if (!GetCustomProperties(args.MobileEnemy.ID, out CustomEnemyProperties customEnemyProperties))
+            var mobileId = args.MobileEnemy.ID;
+            // Only custom enemies moving forward
+            if (!GetCustomProperties(mobileId, out CustomEnemyProperties customEnemyProperties))
                 return;
 
             // Spellbook
@@ -1343,7 +1387,7 @@ namespace DaggerfallBestiaryProject
             }
 
             // Transparent
-            if(customEnemyProperties.isTransparent && customEnemyProperties.mobileEnemy.Behaviour != MobileBehaviour.Spectral)
+            if(customEnemyProperties.isTransparent && args.MobileEnemy.Behaviour != MobileBehaviour.Spectral)
             {                
                 MeshRenderer meshRenderer = enemyEntity.EntityBehaviour.GetComponentInChildren<MeshRenderer>();
                 if (meshRenderer != null)
@@ -2015,6 +2059,82 @@ namespace DaggerfallBestiaryProject
             {
                 DaggerfallUnity.Instance.ItemHelper.AssignEnemyStartingEquipment(playerEntity, enemyEntity, variant);
             }
+        }
+
+        void InitializeDefaultClassicCustomProperties(int mobileID, CustomEnemyProperties classicCustomProperties)
+        {
+            classicCustomProperties.hasRangedAttack = HasClassicRangedAttack(mobileID);
+        }
+
+        bool HasClassicRangedAttack(int mobileID)
+        {
+            switch ((MobileTypes)mobileID)
+            {
+                case MobileTypes.Battlemage:
+                case MobileTypes.Nightblade:
+                case MobileTypes.Bard:
+                case MobileTypes.Burglar:
+                case MobileTypes.Rogue:
+                case MobileTypes.Acrobat:
+                case MobileTypes.Thief:
+                case MobileTypes.Assassin:
+                case MobileTypes.Monk:
+                case MobileTypes.Archer:
+                case MobileTypes.Ranger:
+                case MobileTypes.Barbarian:
+                case MobileTypes.Warrior:
+                case MobileTypes.Knight:
+                    return true;
+            }
+
+            return false;
+        }
+
+        string GetClassicCareerName(int mobileID)
+        {
+            // Monster id
+            if (mobileID < 128)
+            {
+                int careerIndex = mobileID;
+                var monsterCareer = (MonsterCareers)careerIndex;
+                return monsterCareer.ToString();
+            }
+            else if (mobileID == (int)MobileTypes.Knight_CityWatch)
+            {
+                return "Guard";
+            }
+            // Class id
+            else if(mobileID < 256)
+            {
+                int careerIndex = mobileID - 128;
+                var classCareer = (ClassCareers)careerIndex;
+                return classCareer.ToString();
+            }
+            else
+            {
+                throw new ArgumentException($"Mobile '{mobileID}' has unknown career");
+            }
+        }
+
+        public string GetCareerName(int mobileID)
+        {
+            if (GetCustomProperties(mobileID, out CustomEnemyProperties customEnemyProperties) && !string.IsNullOrEmpty(customEnemyProperties.career))
+            {
+                return customEnemyProperties.career;
+            }
+            else if (Enum.IsDefined(typeof(MobileTypes), mobileID))
+            {
+                return GetClassicCareerName(mobileID);
+            }
+            else
+            {
+                throw new ArgumentException($"Mobile '{mobileID}' has unknown career");
+            }
+        }
+
+        public CustomCareer GetCustomCareer(int mobileID)
+        {
+            return customCareers[GetCareerName(mobileID)];
         }
     }
 }
