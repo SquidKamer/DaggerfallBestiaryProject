@@ -6,7 +6,6 @@ using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
-using RoleplayRealism;
 using System.Collections.Generic;
 
 namespace DaggerfallBestiaryProject
@@ -16,6 +15,8 @@ namespace DaggerfallBestiaryProject
         static bool newWeapons = false;
         static bool newArmor = false;
 
+        const int archersAxeTemplateIndex = 513;
+        const int lightFlailTemplateIndex = 514;
         const int hauberkTemplateIndex = 515;
         const int chausseTemplateIndex = 516;
         const int leftSpaulderTemplateIndex = 517;
@@ -230,9 +231,9 @@ namespace DaggerfallBestiaryProject
         }
 
         static int[] blunt = new int[] { (int)Weapons.Mace, (int)Weapons.Flail, (int)Weapons.Warhammer };
-        static int[] bluntWnew = new int[] { (int)Weapons.Mace, (int)Weapons.Flail, (int)Weapons.Warhammer, ItemLightFlail.templateIndex };
+        static int[] bluntWnew = new int[] { (int)Weapons.Mace, (int)Weapons.Flail, (int)Weapons.Warhammer, lightFlailTemplateIndex };
         static int[] axe = new int[] { (int)Weapons.Battle_Axe, (int)Weapons.War_Axe };
-        static int[] axeWnew = new int[] { (int)Weapons.Battle_Axe, (int)Weapons.War_Axe, ItemArchersAxe.templateIndex };
+        static int[] axeWnew = new int[] { (int)Weapons.Battle_Axe, (int)Weapons.War_Axe, archersAxeTemplateIndex };
 
         static int RandomBlunt()
         {
@@ -263,7 +264,7 @@ namespace DaggerfallBestiaryProject
                 case 1:
                     return (int)Weapons.Shortsword;
                 case 2:
-                    return newWeapons ? ItemArchersAxe.templateIndex : (int)Weapons.Short_Bow;
+                    return newWeapons ? archersAxeTemplateIndex : (int)Weapons.Short_Bow;
                 default:
                     return (int)Weapons.Short_Bow;
             }
