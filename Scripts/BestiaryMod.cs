@@ -80,6 +80,7 @@ namespace DaggerfallBestiaryProject
         public class EncounterTable
         {
             public string name;
+            public int[] tableIndices;
             public int[] enemyIds;
         }
 
@@ -155,7 +156,7 @@ namespace DaggerfallBestiaryProject
                     }
                     else if(!Instance.spellbookTables.TryGetValue(customEnemy.spellbookTable, out SpellbookTable spellbookTable))
                     {
-                        Debug.LogError($"Unknown enemy spell table '{customEnemy.spellbookTable}'");
+                        Debug.LogError($"[DEX] Unknown enemy spell table '{customEnemy.spellbookTable}'");
                         callBack(message, null);
                     }
                     else
@@ -214,7 +215,11 @@ namespace DaggerfallBestiaryProject
                 void CreateDefaultTable(int index, string name)
                 {
                     if (encounterTables.ContainsKey(name))
+                    {
+                        if(GetIndexEncounterTables(index).Count == 0)
+                            Debug.LogError($"[DEX] Encounter index '{name}' has no tables");
                         return;
+                    }
 
                     List<EncounterTable> indexEncounterTables = GetIndexEncounterTables(index);
 
@@ -341,7 +346,7 @@ namespace DaggerfallBestiaryProject
                     }
                     if (index == -1)
                     {
-                        Debug.LogError($"Career DB file '{asset.name}': could not find field '{fieldName}' in header");
+                        Debug.LogError($"[DEX] Career DB file '{asset.name}': could not find field '{fieldName}' in header");
                         return false;
                     }
                     return true;
@@ -423,7 +428,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!replacement)
                         {
-                            Debug.LogError($"Career '{careerName}' did not have HitPointsPerLevel specified");
+                            Debug.LogError($"[DEX] Career '{careerName}' did not have HitPointsPerLevel specified");
                             continue;
                         }
 
@@ -433,7 +438,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Strength specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Strength specified");
                             continue;
                         }
 
@@ -443,7 +448,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Intelligence specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Intelligence specified");
                             continue;
                         }
 
@@ -453,7 +458,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Willpower specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Willpower specified");
                             continue;
                         }
 
@@ -463,7 +468,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Agility specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Agility specified");
                             continue;
                         }
 
@@ -473,7 +478,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Strength specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Strength specified");
                             continue;
                         }
 
@@ -483,7 +488,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Strength specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Strength specified");
                             continue;
                         }
 
@@ -493,7 +498,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Personality specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Personality specified");
                             continue;
                         }
 
@@ -503,7 +508,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Speed specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Speed specified");
                             continue;
                         }
 
@@ -513,7 +518,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!replacement)
                         {
-                            Debug.LogError($"Career '{career.Name}' did not have Luck specified");
+                            Debug.LogError($"[DEX] Career '{career.Name}' did not have Luck specified");
                             continue;
                         }
 
@@ -577,7 +582,7 @@ namespace DaggerfallBestiaryProject
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError($"Error while parsing {asset.name}:{lineNumber}: {ex}");
+                        Debug.LogError($"[DEX] Error while parsing {asset.name}:{lineNumber}: {ex}");
                     }
                 }
             }
@@ -683,7 +688,7 @@ namespace DaggerfallBestiaryProject
                     }
                     if (index == -1)
                     {
-                        Debug.LogError($"Monster DB file '{asset.name}': could not find field '{fieldName}' in header");
+                        Debug.LogError($"[DEX] Monster DB file '{asset.name}': could not find field '{fieldName}' in header");
                         return false;
                     }
                     return true;
@@ -816,7 +821,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement)
                         {
-                            Debug.LogError($"Enemy '{mobile.ID}' did not have a Name specified.");
+                            Debug.LogError($"[DEX] Enemy '{mobile.ID}' did not have a Name specified.");
                             continue;
                         }
 
@@ -836,7 +841,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement)
                         {
-                            Debug.LogError($"Enemy '{enemyName}' did not have a Career specified.");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' did not have a Career specified.");
                             continue;
                         }
 
@@ -851,13 +856,13 @@ namespace DaggerfallBestiaryProject
                         }
                         else
                         {
-                            Debug.LogError($"Enemy '{enemyName}' has no defined career");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' has no defined career");
                             continue;
                         }
 
                         if (!customCareers.TryGetValue(careerName, out CustomCareer customCareer))
                         {
-                            Debug.LogError($"Enemy '{enemyName}' has unknown career '{careerName}'");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' has unknown career '{careerName}'");
                             continue;
                         }
 
@@ -886,7 +891,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Enemy '{enemyName}' did not have a Team specified.");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' did not have a Team specified.");
                             continue;
                         }
 
@@ -896,7 +901,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Enemy '{enemyName}' did not have a MaleTexture specified.");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' did not have a MaleTexture specified.");
                             continue;
                         }
 
@@ -906,7 +911,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Enemy '{enemyName}' did not have a FemaleTexture specified.");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' did not have a FemaleTexture specified.");
                             continue;
                         }
 
@@ -919,7 +924,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement)
                         {
-                            Debug.LogError($"Enemy '{enemyName}' did not have a CorpseTextureArchive or CorpseTextureRecord specified.");
+                            Debug.LogError($"[DEX] Enemy '{enemyName}' did not have a CorpseTextureArchive or CorpseTextureRecord specified.");
                             continue;
                         }
 
@@ -1051,7 +1056,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have a level specified. Defaulting to 1");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have a level specified. Defaulting to 1");
                             mobile.Level = 1;
                         }
 
@@ -1061,7 +1066,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if(!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have a min damage specified. Defaulting to 1");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have a min damage specified. Defaulting to 1");
                             mobile.MinDamage = 1;
                         }
 
@@ -1071,7 +1076,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have a max damage specified. Defaulting to {mobile.MinDamage + 1}");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have a max damage specified. Defaulting to {mobile.MinDamage + 1}");
                             mobile.MaxDamage = mobile.MinDamage + 1;
                         }
 
@@ -1101,7 +1106,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have a min health specified. Defaulting to 1");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have a min health specified. Defaulting to 1");
                             mobile.MinHealth = 1;
                         }
 
@@ -1111,7 +1116,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have a max health specified. Defaulting to {mobile.MinHealth + 1}");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have a max health specified. Defaulting to {mobile.MinHealth + 1}");
                             mobile.MaxHealth = mobile.MinHealth + 1;
                         }
 
@@ -1121,7 +1126,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have an armor value specified. Defaulting to 0");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have an armor value specified. Defaulting to 0");
                             mobile.ArmorValue = 0;
                         }
 
@@ -1136,7 +1141,7 @@ namespace DaggerfallBestiaryProject
                         }
                         else if (!enemyReplacement && IsMonster(mobile.ID))
                         {
-                            Debug.LogWarning($"Monster '{enemyName}' did not have a weight specified. Defaulting to 100");
+                            Debug.LogWarning($"[DEX] Monster '{enemyName}' did not have a weight specified. Defaulting to 100");
                             mobile.Weight = 100;
                         }
 
@@ -1153,7 +1158,7 @@ namespace DaggerfallBestiaryProject
                         {
                             if(IsMonster(mobile.ID))
                             {
-                                Debug.LogWarning($"Monster '{enemyName}' does not have a defined MoveSound. This can cause issues.");
+                                Debug.LogWarning($"[DEX] Monster '{enemyName}' does not have a defined MoveSound. This can cause issues.");
                                 mobile.MoveSound = -1;
                             }
                             else
@@ -1170,7 +1175,7 @@ namespace DaggerfallBestiaryProject
                         {
                             if (IsMonster(mobile.ID))
                             {
-                                Debug.LogWarning($"Monster '{enemyName}' does not have a defined BarkSound. This can cause issues.");
+                                Debug.LogWarning($"[DEX] Monster '{enemyName}' does not have a defined BarkSound. This can cause issues.");
                                 mobile.BarkSound = -1;
                             }
                             else
@@ -1187,7 +1192,7 @@ namespace DaggerfallBestiaryProject
                         {
                             if (IsMonster(mobile.ID))
                             {
-                                Debug.LogWarning($"Monster '{enemyName}' does not have a defined AttackSound. This can cause issues.");
+                                Debug.LogWarning($"[DEX] Monster '{enemyName}' does not have a defined AttackSound. This can cause issues.");
                                 mobile.BarkSound = -1;
                             }
                             else
@@ -1238,7 +1243,7 @@ namespace DaggerfallBestiaryProject
                             float[] components = ParseFloatArrayArg(tokens[GlowColorIndex.Value], $"line={lineNumber},column={GlowColorIndex}");
                             if(components.Length < 3)
                             {
-                                Debug.LogError($"Enemy '{enemyName}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
+                                Debug.LogError($"[DEX] Enemy '{enemyName}' had invalid glow color '{tokens[GlowColorIndex.Value]}'");
                             }
                             else
                             {
@@ -1330,7 +1335,7 @@ namespace DaggerfallBestiaryProject
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError($"Error while parsing {asset.name}:{lineNumber}: {ex}");
+                        Debug.LogError($"[DEX] Error while parsing {asset.name}:{lineNumber}: {ex}");
                     }
                 }
             }
@@ -1402,7 +1407,7 @@ namespace DaggerfallBestiaryProject
         {
             if(!spellbookTables.TryGetValue(customEnemy.spellbookTable, out SpellbookTable spellbookTable))
             {
-                Debug.LogError($"Unknown enemy spell table '{customEnemy.spellbookTable}'");
+                Debug.LogError($"[DEX] Unknown enemy spell table '{customEnemy.spellbookTable}'");
                 return;
             }
 
@@ -1427,14 +1432,14 @@ namespace DaggerfallBestiaryProject
                 GameManager.Instance.EntityEffectBroker.GetClassicSpellRecord(spellID, out spellData);
                 if (spellData.index == -1)
                 {
-                    Debug.LogError($"Failed to locate enemy spell '{spellID}' in standard spells list.");
+                    Debug.LogError($"[DEX] Failed to locate enemy spell '{spellID}' in standard spells list.");
                     continue;
                 }
 
                 EffectBundleSettings bundle;
                 if (!GameManager.Instance.EntityEffectBroker.ClassicSpellRecordDataToEffectBundleSettings(spellData, BundleTypes.Spell, out bundle))
                 {
-                    Debug.LogError("Failed to create effect bundle for enemy spell: " + spellData.spellName);
+                    Debug.LogError("[DEX] Failed to create effect bundle for enemy spell: " + spellData.spellName);
                     continue;
                 }
                 enemyEntity.AddSpell(bundle);
@@ -1635,11 +1640,13 @@ namespace DaggerfallBestiaryProject
 
                 string[] fields = header.Split(';', ',').Select(field => field.Trim('\"')).ToArray();
 
-                if (fields.Length != 22)
+                if (fields.Length < 21)
                 {
-                    Debug.LogError($"Error while parsing {asset.name}: table database has invalid format (expected 22 columns)");
+                    Debug.LogError($"[DEX] Error while parsing {asset.name}: table database has invalid format (expected at least 21 columns)");
                     continue;
                 }
+
+                bool hasTableIndices = fields[1].Equals("Table Indices", StringComparison.InvariantCultureIgnoreCase);
 
                 CultureInfo cultureInfo = new CultureInfo("en-US");
                 int lineNumber = 1;
@@ -1651,33 +1658,68 @@ namespace DaggerfallBestiaryProject
                     try
                     {
                         string[] tokens = SplitCsvLine(line);
-                        if(tokens.Length != 22)
+                        if(tokens.Length < 21)
                         {
-                            Debug.LogError($"Error while parsing {asset.name}:{lineNumber}: table database line has invalid format (expected 22 columns)");
-                            break; 
+                            Debug.LogError($"[DEX] Error while parsing {asset.name}:{lineNumber}: table database line has invalid format (expected at least 21 columns)");
+                            continue; 
                         }
 
-                        if(encounterTables.ContainsKey(tokens[0]))
+                        var name = tokens[0];
+                        if (encounterTables.TryGetValue(name, out EncounterTable table))
                         {
-                            continue;
+                            // Table replacement
+                            if (hasTableIndices)
+                            {
+                                var tableIndices = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
+                                if (tableIndices != null && tableIndices.Length != 0 && !tableIndices.SequenceEqual(table.tableIndices))
+                                {
+                                    // Remove it from all previous indices
+                                    foreach (int tableIndex in table.tableIndices)
+                                    {
+                                        List<EncounterTable> indexTables = GetIndexEncounterTables(tableIndex);
+                                        indexTables.RemoveAll(t => t.name == name);
+                                    }
+
+                                    table.tableIndices = tableIndices;
+
+                                    // Add it back to the new indices
+                                    foreach (int tableIndex in table.tableIndices)
+                                    {
+                                        List<EncounterTable> indexTables = GetIndexEncounterTables(tableIndex);
+                                        indexTables.Add(table);
+                                    }                                    
+                                }                                
+                            }
+
+                            table.enemyIds = tokens.Skip(hasTableIndices ? 2 : 1).Select(id => int.Parse(id)).ToArray();
                         }
-
-                        EncounterTable table = new EncounterTable();
-                        table.name = tokens[0];
-
-                        var tableIndices = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
-
-                        table.enemyIds = tokens.Skip(2).Select(id => int.Parse(id)).ToArray();
-
-                        foreach(int tableIndex in tableIndices)
+                        else
                         {
-                            GetIndexEncounterTables(tableIndex).Add(table);
+                            if(!hasTableIndices)
+                            {
+                                Debug.LogError($"[DEX] Error while parsing new encounter tables: table indices not specified");
+                                continue;
+                            }
+
+                            table = new EncounterTable();
+                            table.name = tokens[0];
+                            table.tableIndices = ParseArrayArg(tokens[1], $"line={lineNumber}, column=2");
+                            foreach (int tableIndex in table.tableIndices)
+                            {
+                                List<EncounterTable> indexTables = GetIndexEncounterTables(tableIndex);
+                                indexTables.Add(table);
+                            }
+
+                            table.enemyIds = tokens.Skip(2).Select(id => int.Parse(id)).ToArray();
+
+                            
+                            encounterTables.Add(table.name, table);
                         }
-                        encounterTables.Add(table.name, table);
+                        
                     }
                     catch(Exception ex)
                     {
-                        Debug.LogError($"Error while parsing {asset.name}:{lineNumber}: {ex}");
+                        Debug.LogError($"[DEX] Error while parsing {asset.name}:{lineNumber}: {ex}");
                     }
                 }
             }

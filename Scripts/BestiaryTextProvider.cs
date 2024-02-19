@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using DaggerfallWorkshop.Utility;
 
 namespace DaggerfallBestiaryProject
