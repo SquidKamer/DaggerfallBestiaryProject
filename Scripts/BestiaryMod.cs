@@ -1725,6 +1725,33 @@ namespace DaggerfallBestiaryProject
             }
         }
 
+        void SelectDungeonTable(int index)
+        {
+            PlayerGPS gps = GameManager.Instance.PlayerGPS;
+            if(gps == null || !gps.HasCurrentLocation || !gps.CurrentLocation.HasDungeon)
+            {
+                Debug.LogError($"[DEX] Dungeon table index '{index}' selected outside of dungeon");
+                SelectTable(index);
+                return;
+            }
+
+            List<EncounterTable> tables = GetIndexEncounterTables(index);
+            if (tables == null || tables.Count == 0)
+                return;
+
+            ushort unknown2 = (ushort)gps.CurrentLocation.Dungeon.RecordElement.Header.Unknown2;
+            byte region = (byte)gps.CurrentRegionIndex;
+            DFRandom.srand(unknown2 ^ ((byte)region << 8));
+            var random = DFRandom.rand();
+            var tableIndex = (int)(random % tables.Count);
+
+            EncounterTable selectedTable = tables[tableIndex];
+
+            ref RandomEncounterTable table = ref RandomEncounters.EncounterTables[index];
+
+            table.Enemies = selectedTable.enemyIds.Select(id => (MobileTypes)id).ToArray();
+        }
+
         void SelectTable(int index)
         {
             List<EncounterTable> tables = GetIndexEncounterTables(index);
@@ -1750,8 +1777,8 @@ namespace DaggerfallBestiaryProject
             if (!Enum.IsDefined(typeof(DFRegion.DungeonTypes), (int)location.MapTableData.DungeonType))
                 return;
 
-            SelectTable((int)location.MapTableData.DungeonType);
-            SelectTable(19); // Pick an underwater one too
+            SelectDungeonTable((int)location.MapTableData.DungeonType);
+            SelectDungeonTable(19); // Pick an underwater one too
         }
 
         void SelectClimateTables(int climateIndex)
